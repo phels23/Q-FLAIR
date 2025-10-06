@@ -1,0 +1,17 @@
+Xtest   datasets/Xmnist_test_3_5_7x7_N_1000.csv
+Xtrain   datasets/Xmnist_train_3_5_7x7_N_1000.csv
+Xval   datasets/Xmnist_test_3_5_7x7_N_1000.csv
+Ytest   datasets/Ymnist_test_3_5_7x7_N_1000.csv
+Ytrain   datasets/Ymnist_train_3_5_7x7_N_1000.csv
+Yval   datasets/Ymnist_test_3_5_7x7_N_1000.csv
+train_start 0
+train_length  1000
+seed    12345
+repetition  10
+layers 100
+gateList   Rxx_x,Ryy_x,U2_x,U3_x,H_y
+kernelFile  mnist_logLoss/Kernel_collect_3_5_7x7_N_1000.txt
+gateFile    mnist_logLoss/Gate_collect_3_5_7x7_N_1000.txt
+costFile    mnist_logLoss/Cost_collect_3_5_7x7_N_1000.txt
+parallel    4
+#,H_y
