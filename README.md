@@ -25,5 +25,11 @@ The programs in QSVM are:
 
 - 'SVM_main_parallel.py' is the basic algorithm for the training of a QSVM
 - 'SVM_predict.py' is the code that is used to predict average accuracies on test datasets
-    
+
+The programs in Datasets are:
+
+- 'DataGeneration_MNIST.py' is the MNIST dataset generator with the desired dimension
+- 'DataGeneration.py' is the general dataset generator for other datasets
+- 'mnist_pixel_processing.py' is the code to process and downscale the MNIST dataset 
+
 The functions 'read_data' contain the options for the input files.
