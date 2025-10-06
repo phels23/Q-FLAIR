@@ -31,6 +31,12 @@ The programs in QSVM are:
 
 - 'SVM_main_parallel.py' is the basic algorithm for the training of a QSVM
 - 'SVM_predict.py' is the code that is used to predict average accuracies on test datasets
+  
+The programs in QSVM_IBM are:
+
+- 'QSVM_ibm.py' is the basic algorithm for the training of a QSVM for the IBM quantum computing benchmark
+- 'QSVM_predict_ibm.py' is the code that is used to predict average accuracies on the train and test datasets, given both the IBM benchmark model results and also numerical simulations as a reference
+- Remaining files are copies, potentially with slight modifications specific to IBM benchmarking, of the helper helper files (e.g., containing definitions) in QNN (not QSVM, since the QSVM_IBM code was adopted from QNN_IBM)
 
 The functions 'read_data' contain the options for the input files.
 
