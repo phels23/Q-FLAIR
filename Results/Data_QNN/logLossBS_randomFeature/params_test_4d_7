@@ -1,0 +1,20 @@
+Xtest   datasets/Xbars-and-stripes_4d_200.csv
+Xtrain   datasets/Xbars-and-stripes_4d_1000.csv
+Xval   datasets/Xbars-and-stripes_4d_200.csv
+Ytest   datasets/Ybars-and-stripes_4d_200.csv
+Ytrain   datasets/Ybars-and-stripes_4d_1000.csv
+Yval   datasets/Ybars-and-stripes_4d_200.csv
+train_start 0
+train_length  1000
+seed    7
+repetition  10
+layers 100
+gateList   Rxx_x,Ryy_x,Rzz_x,CP_x,U1_x,U2_x,U3_x,P_x,X_x,Xn_x,Xm_x,Z_x,Zn_x,Zm_x
+kernelFile  bars-and-stripes_logLoss_randomFeature/Kernel_4d_1000_seed7.txt
+gateFile    bars-and-stripes_logLoss_randomFeature/Gate_4d_1000_seed7.txt
+costFile    bars-and-stripes_logLoss_randomFeature/Cost_4d_1000_seed7.txt
+parallel    14
+accOut  bars-and-stripes_logLoss_randomFeature/ACC_test_4d_1000_7.txt
+nTest   200
+#possible gates: Xn_x,Xm_x,Z_x,Zn_x,Zm_x,T_x,
+#or Rz_x,H_x,X_x,U1_x,Rx_x,Rxx_x,Ry_x,Ryy_x,Rzx_x,Rzz_x,S_x,Sdg_x,swap_x,Sx_x,Sxdg_x,Y_x
