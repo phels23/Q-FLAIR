@@ -1,0 +1,22 @@
+Xtest   datasets/Xbars-and-stripes_4d_200.csv
+Xtrain   datasets/Xbars-and-stripes_4d_1000.csv
+Xval   datasets/Xbars-and-stripes_4d_200.csv
+Ytest   datasets/Ybars-and-stripes_4d_200.csv
+Ytrain   datasets/Ybars-and-stripes_4d_1000.csv
+Yval   datasets/Ybars-and-stripes_4d_200.csv
+train_start 0
+# 0 means all data
+train_length  0
+gateList   U1_x,U2_x,U3_x,Rzz_x,Rxx_x,Ryy_x
+#gateList   H_y,Rxx_x,Ryy_x,Rzz_x,CP_x,U1_x,U2_x,U3_x,P_x,X_x,Xn_x,Xm_x,Z_x,Zn_x,Zm_x
+kernelFile  ibm/bars_stripes/Kernel.txt
+gateFile    ibm/bars_stripes/Gate.txt
+costFile    ibm/bars_stripes/Cost.txt
+parallel    8
+accOut  ibm/bars_stripes/ACC.txt
+nTest   100
+train_batch 32
+nNystroem  0
+shots  1024
+backend  ibm_sherbrooke
+use_sampler  True

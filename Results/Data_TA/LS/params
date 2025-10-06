@@ -1,0 +1,20 @@
+Xtest   datasets/Xlinearly-separable_test_1000.csv
+Xtrain   datasets/Xlinearly-separable_train_1000.csv
+Xval   datasets/Xlinearly-separable_test_1000.csv
+Ytest   datasets/Ylinearly-separable_test_1000.csv
+Ytrain   datasets/Ylinearly-separable_train_1000.csv
+Yval   datasets/Ylinearly-separable_test_1000.csv
+train_start 0
+train_length  1000
+seed    1
+repetition  10
+layers 100
+gateList   U1_x,H_x,Z_x,Zn_x,ZH_x,ZHn_x,Rxx_x,Ryy_x,Rzz_x
+kernelFile  linearly-separable/Kernel_collect.txt
+gateFile    linearly-separable/Gate_collect.txt
+costFile    linearly-separable/Cost_collect.txt
+parallel    20
+#accOut  bars-and-stripes/ACC.txt
+#nTest   2000
+#possible gates: Xn_x,Xm_x,Z_x,Zn_x,Zm_x,T_x,
+#or Rz_x,H_x,X_x,U1_x,Rx_x,Rxx_x,Ry_x,Ryy_x,Rzx_x,Rzz_x,S_x,Sdg_x,swap_x,Sx_x,Sxdg_x,Y_x

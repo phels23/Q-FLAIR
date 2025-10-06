@@ -1,0 +1,20 @@
+Xtest   datasets/Xtwo-curves_test_1000.csv
+Xtrain   datasets/Xtwo-curves_train_1000.csv
+Xval   datasets/Xtwo-curves_test_1000.csv
+Ytest   datasets/Ytwo-curves_test_1000.csv
+Ytrain   datasets/Ytwo-curves_train_1000.csv
+Yval   datasets/Ytwo-curves_test_1000.csv
+train_start 0
+train_length  1000
+seed    1
+repetition  10
+layers 100
+gateList   U1_x,H_x,Z_x,Zn_x,ZH_x,ZHn_x,Rxx_x,Ryy_x,Rzz_x
+kernelFile  two-curves_parallel/Kernel_collect.txt
+gateFile    two-curves_parallel/Gate_collect.txt
+costFile    two-curves_parallel/Cost_collect.txt
+parallel    14
+accOut  two-curves_parallel/ACC_test.txt
+nTest   1000
+#possible gates: Xn_x,Xm_x,Z_x,Zn_x,Zm_x,T_x,
+#or Rz_x,H_x,X_x,U1_x,Rx_x,Rxx_x,Ry_x,Ryy_x,Rzx_x,Rzz_x,S_x,Sdg_x,swap_x,Sx_x,Sxdg_x,Y_x

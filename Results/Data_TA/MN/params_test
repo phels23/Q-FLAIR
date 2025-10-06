@@ -1,0 +1,20 @@
+Xtest   datasets/Xmnist-pca_test_10d_1902.csv
+Xtrain   datasets/Xmnist-pca_train_10d_11552.csv
+Xval   datasets/Xmnist-pca_test_10d_1902.csv
+Ytest   datasets/Ymnist-pca_test_10d_1902.csv
+Ytrain   datasets/Ymnist-pca_train_10d_11552.csv
+Yval   datasets/Ymnist-pca_test_10d_1902.csv
+train_start 0
+train_length  1000
+seed    12345
+repetition  10
+layers 100
+gateList   U1_x,H_x,Z_x,Zn_x,ZH_x,ZHn_x,Rxx_x,Ryy_x,Rzz_x
+kernelFile  mnist-pca/Kernel_collect_1000_10d.txt
+gateFile    mnist-pca/Gate_collect_1000_10d.txt
+costFile    mnist-pca/Cost_collect_1000_10d.txt
+parallel    14
+accOut  mnist-pca/ACC_test_1000.txt
+nTest   1000
+#possible gates: Xn_x,Xm_x,Z_x,Zn_x,Zm_x,T_x,
+#or Rz_x,H_x,X_x,U1_x,Rx_x,Rxx_x,Ry_x,Ryy_x,Rzx_x,Rzz_x,S_x,Sdg_x,swap_x,Sx_x,Sxdg_x,Y_x
