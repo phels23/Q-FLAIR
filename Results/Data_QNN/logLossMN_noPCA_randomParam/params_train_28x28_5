@@ -1,0 +1,20 @@
+Xtest   datasets/Xmnist_train_3_5_28x28_N_1000.csv
+Xtrain   datasets/Xmnist_train_3_5_28x28_N_1000.csv
+Xval   datasets/Xmnist_train_3_5_28x28_N_1000.csv
+Ytest   datasets/Ymnist_train_3_5_28x28_N_1000.csv
+Ytrain   datasets/Ymnist_train_3_5_28x28_N_1000.csv
+Yval   datasets/Ymnist_train_3_5_28x28_N_1000.csv
+train_start 0
+train_length  1000
+seed    5
+repetition  10
+layers 100
+gateList   Rxx_x,Ryy_x,U2_x,U3_x,H_y,X_x,Xn_x,Xm_x
+kernelFile  mnist_logLoss_randomParam/Kernel_collect_3_5_28x28_N_1000_seed5.txt
+gateFile    mnist_logLoss_randomParam/Gate_collect_3_5_28x28_N_1000_seed5.txt
+costFile    mnist_logLoss_randomParam/Cost_collect_3_5_28x28_N_1000_seed5.txt
+parallel    14
+accOut  mnist_logLoss_randomParam/ACC_train_3_5_28x28_N_1000_seed5.txt
+nTest   1000
+#possible gates: Xn_x,Xm_x,Z_x,Zn_x,Zm_x,T_x,
+#or Rz_x,H_x,X_x,U1_x,Rx_x,Rxx_x,Ry_x,Ryy_x,Rzx_x,Rzz_x,S_x,Sdg_x,swap_x,Sx_x,Sxdg_x,Y_x
