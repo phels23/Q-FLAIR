@@ -26,10 +26,23 @@ The programs in QSVM are:
 - 'SVM_main_parallel.py' is the basic algorithm for the training of a QSVM
 - 'SVM_predict.py' is the code that is used to predict average accuracies on test datasets
 
+The functions 'read_data' contain the options for the input files.
+
+
 The programs in Datasets are:
 
 - 'DataGeneration_MNIST.py' is the MNIST dataset generator with the desired dimension
 - 'DataGeneration.py' is the general dataset generator for other datasets
-- 'mnist_pixel_processing.py' is the code to process and downscale the MNIST dataset 
 
-The functions 'read_data' contain the options for the input files.
+The data in Results is split in data for experiments and simulations of quantum neural networks (QNN) 'Data_QNN' and quantum support vector machines (QSVM) 'Data_TA'. The programs in the directory plot the figures in the publication:
+
+- 'PlotAcc_IBM_paper.ipynb' plots the overview over the accuracies from QNN experiments on a quantum computer
+- 'PlotAcc_Ta_IBM_paper.ipynb' plots the overview over the accuracies for QSVM experiments on a quantum computer
+- 'PlotAcc_TA_paper.ipynb' plots the overview over the accuracies for the QSVM simulations
+- 'PlotAcc_paper.ipynb' plots the overview over the accuracies for the QNN simulations
+- 'PlotMNIST-MNIST_pca_paper.ipynb' plots the comparison between the MNIST and the MNIST pca datasets
+- 'PlotMinGateNeeded.ipynb' plots the comparison between QSVM and QNN with regard to required gates for a given accuracy
+- 'PlotOptim.ipynb' plots the results for post-optimization
+- 'mnist_pixel_processing.py' is the code to process and downscale the MNIST dataset
+- 'PlotRandomGate_paper.ipynb' plots the result of the ablation study
+
