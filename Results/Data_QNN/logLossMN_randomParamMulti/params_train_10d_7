@@ -1,0 +1,20 @@
+Xtest   datasets/Xmnist-pca_train_10d_11552.csv
+Xtrain   datasets/Xmnist-pca_train_10d_11552.csv
+Xval   datasets/Xmnist-pca_train_10d_11552.csv
+Ytest   datasets/Ymnist-pca_train_10d_11552.csv
+Ytrain   datasets/Ymnist-pca_train_10d_11552.csv
+Yval   datasets/Ymnist-pca_train_10d_11552.csv
+train_start 0
+train_length  11552
+seed    7
+repetition  10
+layers 100
+gateList   Rxx_x,Ryy_x,Rzz_x,CP_x,U1_x,U2_x,U3_x,P_x,H_y,X_x,Xn_x,Xm_x,Z_x,Zn_x,Zm_x
+kernelFile  mnist-pca_logLoss_randomAngle/Kernel_collect_10d_11552_seed7.txt
+gateFile    mnist-pca_logLoss_randomAngle/Gate_collect_10d_11552_seed7.txt
+costFile    mnist-pca_logLoss_randomAngle/Cost_collect_10d_11552_seed7.txt
+parallel    14
+accOut  mnist-pca_logLoss_randomAngle/ACC_train_10d_11552_7.txt
+nTest   11552
+#possible gates: Xn_x,Xm_x,Z_x,Zn_x,Zm_x,T_x,
+#or Rz_x,H_x,X_x,U1_x,Rx_x,Rxx_x,Ry_x,Ryy_x,Rzx_x,Rzz_x,S_x,Sdg_x,swap_x,Sx_x,Sxdg_x,Y_x
