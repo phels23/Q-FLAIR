@@ -21,13 +21,18 @@ The programs in QNN are:
     - 'pofc_cobyla.py' optimizes the model with cobyla and uses as initial configuration the iteratively optimized parameters
     - 'pofc_cobyla_rnd.py' optimizes the model with cobyla and uses as initial configuration the random parameters
 
+The programs in QNN_IBM are:
+
+- 'QNN_logLoss_ibm.py' is the basic algorithm for the training of a QNN for the IBM quantum computing benchmark
+- 'QNN_predict_ibm.py' is the code that is used to predict average accuracies on the train and test datasets, given both the IBM benchmark model results and also numerical simulations as a reference
+- Remaining files are copies, potentially with slight modifications specific to IBM benchmarking, of the helper helper files (e.g., containing definitions) in QNN 
+
 The programs in QSVM are:
 
 - 'SVM_main_parallel.py' is the basic algorithm for the training of a QSVM
 - 'SVM_predict.py' is the code that is used to predict average accuracies on test datasets
 
 The functions 'read_data' contain the options for the input files.
-
 
 The programs in Datasets are:
 
