@@ -1,0 +1,21 @@
+Xtest   datasets/Xtwo-curves_test_1000.csv
+Xtrain   datasets/Xtwo-curves_train_1000.csv
+Xval   datasets/Xtwo-curves_test_1000.csv
+Ytest   datasets/Ytwo-curves_test_1000.csv
+Ytrain   datasets/Ytwo-curves_train_1000.csv
+Yval   datasets/Ytwo-curves_test_1000.csv
+train_start 0
+# 0 means all data
+train_length  0
+gateList   H_y,U2_x,U3_x,Rxx_x,Ryy_x
+#gateList   H_y,Rxx_x,Ryy_x,Rzz_x,CP_x,U1_x,U2_x,U3_x,P_x,X_x,Xn_x,Xm_x,Z_x,Zn_x,Zm_x
+kernelFile  ibm/two_curves/Kernel.txt
+gateFile    ibm/two_curves/Gate.txt
+costFile    ibm/two_curves/Cost.txt
+parallel    8
+accOut  ibm/two_curves/ACC.txt
+nTest   200
+train_batch  64
+shots  1024
+backend  ibm_brussels
+use_sampler  True

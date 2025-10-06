@@ -1,0 +1,21 @@
+Xtest   datasets/Xmnist_test_3_5_28x28_N_1000.csv
+Xtrain   datasets/Xmnist_train_3_5_28x28_N_1000.csv
+Xval   datasets/Xmnist_test_3_5_28x28_N_1000.csv
+Ytest   datasets/Ymnist_test_3_5_28x28_N_1000.csv
+Ytrain   datasets/Ymnist_train_3_5_28x28_N_1000.csv
+Yval   datasets/Ymnist_test_3_5_28x28_N_1000.csv
+train_start 0
+# 0 means all data
+train_length  0
+gateList   H_y,U2_x,U3_x,Rxx_x,Ryy_x
+#gateList   H_y,Rxx_x,Ryy_x,Rzz_x,CP_x,U1_x,U2_x,U3_x,P_x,X_x,Xn_x,Xm_x,Z_x,Zn_x,Zm_x
+kernelFile  ibm/MNIST_28_256/Kernel.txt
+gateFile    ibm/MNIST_28_256/Gate.txt
+costFile    ibm/MNIST_28_256/Cost.txt
+parallel    32
+accOut  ibm/MNIST_28_256/ACC.txt
+nTest   200
+train_batch  200
+shots  1024
+backend  ibm_strasbourg
+use_sampler  True

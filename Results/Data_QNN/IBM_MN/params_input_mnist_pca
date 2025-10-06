@@ -1,0 +1,21 @@
+Xtest   datasets/Xmnist-pca_test_10d_1902.csv
+Xtrain   datasets/Xmnist-pca_train_10d_11552.csv
+Xval   datasets/Xmnist-pca_test_10d_1902.csv
+Ytest   datasets/Ymnist-pca_test_10d_1902.csv
+Ytrain   datasets/Ymnist-pca_train_10d_11552.csv
+Yval   datasets/Ymnist-pca_test_10d_1902.csv
+train_start 0
+# 0 means all data
+train_length  0
+gateList   H_y,U2_x,U3_x,Rxx_x,Ryy_x
+#gateList   H_y,Rxx_x,Ryy_x,Rzz_x,CP_x,U1_x,U2_x,U3_x,P_x,X_x,Xn_x,Xm_x,Z_x,Zn_x,Zm_x
+kernelFile  ibm/MNIST_PCA/Kernel.txt
+gateFile    ibm/MNIST_PCA/Gate.txt
+costFile    ibm/MNIST_PCA/Cost.txt
+parallel    8
+accOut  ibm/MNIST_PCA/ACC.txt
+nTest   200
+train_batch  64
+shots  1024
+backend  ibm_brisbane
+use_sampler  True
