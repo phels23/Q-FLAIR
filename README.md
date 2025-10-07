@@ -1,5 +1,11 @@
-# Q-FLAIR
-Code and data for the article: J. Jäger, P. Elsässer, and E. Torabian, "Quantum feature-map learning with reduced resource overhead"
+# Q-FLAIR 
+***(Quantum Feature-Map Learning via Analytic Iterative Reconstructions)***
+
+Code and data for the article: 
+    
+J. Jäger, P. Elsässer, and E. Torabian, "Quantum feature-map learning with reduced resource overhead"
+
+(available as an [arXiv preprint arXiv:2510.03389](https://arxiv.org/abs/2510.03389))
 
 The learning of quantum features by Q-FLAIR was demonstrated for quantum neural networks and quantum support vector machines. The code for the quantum neural network may be found in 'QNN', that for the quantum support vector machines in 'QSVM'.
 
