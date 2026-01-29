@@ -9,6 +9,10 @@ J. Jäger, P. Elsässer, and E. Torabian, "Quantum feature-map learning with red
 
 The learning of quantum features by Q-FLAIR was demonstrated for quantum neural networks and quantum support vector machines. The code for the quantum neural network may be found in 'QNN', that for the quantum support vector machines in 'QSVM'.
 
+Installation of the Python environment (Python 3.11 recommended) to run the code can be achieved as follows:
+- For numerical simulations, use 'requirements.txt' and install via `pip install -r requirements.txt`
+- For IBM quantum computers, use 'requirements_ibm.txt' and install via `pip install -r requirements_ibm.txt`
+
 The programs in QNN are:
 
 - 'QNN_logLoss.py' is the basic algorithm for the training of a QNN
