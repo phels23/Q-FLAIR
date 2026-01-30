@@ -521,7 +521,7 @@ n_epochs = 1000
 optimizer = torch.optim.Adam(classical_surrogate_model.parameters(), lr=learning_rate)
 # use minibatches
 batch_size = 64
-mem_size = max(min(batch_size, MAX_FREQS // Omega_torch.numel()), 1)  # at least 1 element in mem chunk
+mem_size = max(min(batch_size, MAX_FREQS // n_freq_est), 1)  # at least 1 element in mem chunk
 print(f'Batch size: {batch_size} Using memory chunk size: {mem_size}', flush=True)
 # use dataset loader for batching
 train_dataset = torch.utils.data.TensorDataset(X_train_torch, Y_train_torch)
