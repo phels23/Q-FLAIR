@@ -15,6 +15,7 @@ from qiskit_aer import AerSimulator
 import itertools
 from collections import defaultdict
 import torch
+from tqdm import tqdm
 
 
 def read_data():
@@ -345,69 +346,79 @@ fourier_coeffs = {feat: np.zeros((len(freqs),), dtype=np.complex128) for feat, f
 n_selected_features = len(selected_features)
 omega = [[f * e_i for f in freqs] for e_i, (_, freqs) in zip(np.eye(n_selected_features), sorted(unique_freqs.items())) ]
 Omega = [sum(pair) for pair in itertools.product(*omega)]
+print(f"Number of total Fourier features: {len(Omega)}", flush=True)
+# switch to torch tensors
+Omega_torch = torch.tensor(np.asarray(Omega), dtype=torch.float64).T
 
-def fourier_features(X, Omega, feat_idxs=None, complex_form=False):
-    X = np.atleast_2d(X)
-    if feat_idxs is not None:
-        X = X[:, feat_idxs]
-    projections = X @ np.asarray(Omega).T
-
-    Z = np.exp(-1j * projections)
-
-    if complex_form:
-        return Z
-    else:
-        np.conjugate(Z, out=Z)  # In-place sign flip of the sine terms
-        real_features = Z.view(np.float64)
-        return real_features
-
-
-fourier_Xtrain = fourier_features(normalized_Xtrain, Omega, selected_features, complex_form=False)
-fourier_Xval = fourier_features(normalized_Xval, Omega, selected_features, complex_form=False)
-
-# switch to torch for optimization (use squared loss) -> TODO check if log loss is possible; what is the convexity argument from the paper? only for the fourier coeff reconstruction, not full learning I guess
-fourier_Xtrain_torch = torch.tensor(fourier_Xtrain, dtype=torch.float64)
+X_train_torch = torch.tensor(normalized_Xtrain[:, selected_features], dtype=torch.float64)
 Y_train_torch = torch.tensor(Y_train, dtype=torch.float64).view(-1, 1)
-fourier_Xval_torch = torch.tensor(fourier_Xval, dtype=torch.float64)
+
+X_val_torch = torch.tensor(normalized_Xval[:, selected_features], dtype=torch.float64)
 Y_val_torch = torch.tensor(Y_val, dtype=torch.float64).view(-1, 1)
-# model is just linear in fourier features
-linear_model = torch.nn.Linear(fourier_Xtrain_torch.shape[1], 1, bias=False, dtype=torch.float64)  # bias already included in Fourier features as zero frequency component
-# initialize fourier coeffs to zero
-with torch.no_grad():
-    linear_model.weight.zero_()
-# define loss function
+
+
+class FourierLinearModel(torch.nn.Module):
+    def __init__(self, omega_matrix, out_features=1):
+        super().__init__()
+        self.register_buffer('Omega', omega_matrix)
+        n_fourier_feats = 2 * omega_matrix.shape[1]
+
+        # Linear layer without bias (as bias is included in Fourier features via zero frequency component)
+        self.linear = torch.nn.Linear(n_fourier_feats, out_features, bias=False, dtype=torch.float64)
+
+        # Initialize weights
+        with torch.no_grad():
+            self.linear.weight.zero_()
+
+    def forward(self, x):
+        # 1. Project: X @ Omega.T
+        projections = x @ self.Omega
+
+        # 2. Compute Features: cos(proj), sin(proj)
+        features = torch.cat([torch.cos(projections), torch.sin(projections)], dim=-1)
+
+        # 3. Linear Prediction
+        return self.linear(features)
+
+
+classical_surrogate_model = FourierLinearModel(Omega_torch)
 
 # TODO use log loss, which is more appropriate for classification and should maintain convexity!
 loss_fn = torch.nn.MSELoss()
 # use stochastic gradient descent to learn fourier coeffs
-learning_rate = 1e-5
+learning_rate = 1e-7
 n_epochs = 1000
-optimizer = torch.optim.SGD(linear_model.parameters(), lr=learning_rate)
+optimizer = torch.optim.SGD(classical_surrogate_model.parameters(), lr=learning_rate)
 # use minibatches
-batch_size = 100
+batch_size = 64
 # use dataset loader for batching
-train_dataset = torch.utils.data.TensorDataset(fourier_Xtrain_torch, Y_train_torch)
+train_dataset = torch.utils.data.TensorDataset(X_train_torch, Y_train_torch)
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+val_dataset = torch.utils.data.TensorDataset(X_val_torch, Y_val_torch)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 # after each epoch, evaluate on validation set and print loss + accuracy
-for epoch in range(n_epochs):
-    linear_model.train()  # switch to train mode
+for epoch in tqdm(range(n_epochs)):
+    classical_surrogate_model.train()  # switch to train mode
     for X_batch, Y_batch in train_loader:
         optimizer.zero_grad()
-        Y_pred = linear_model(X_batch)
+        Y_pred = classical_surrogate_model(X_batch)
         loss = loss_fn(Y_pred, Y_batch)
         loss.backward()
+        batch_acc = ((Y_pred >= 0.5).float() == Y_batch).float().mean()
         optimizer.step()
     if (epoch + 1) % 100 == 0:
-        linear_model.eval()  # switch to eval mode
+        classical_surrogate_model.eval()  # switch to eval mode
         with torch.no_grad():
-            Y_val_pred = linear_model(fourier_Xval_torch)
+            # use batch loader for evaluation too:
+            Y_val_pred = torch.cat([classical_surrogate_model(X_val_batch) for X_val_batch, _ in val_loader], dim=0)
             val_loss = loss_fn(Y_val_pred, Y_val_torch)
             val_acc = ((Y_val_pred >= 0.5).float() == Y_val_torch).float().mean()
-            Y_train_pred = linear_model(fourier_Xtrain_torch)
-            train_loss = loss_fn(Y_train_pred, Y_train_torch)
-            train_acc = ((Y_train_pred >= 0.5).float() == Y_train_torch).float().mean()
-        print(f'Epoch {epoch + 1}/{n_epochs}, Training Loss: {train_loss.item()}, Accuracy: {train_acc.item():.4f}', flush=True)
-        print(f'Epoch {epoch + 1}/{n_epochs}, Validation Loss: {val_loss.item()}, Accuracy: {val_acc.item():.4f}\n', flush=True)
+            Y_train_pred, Y_train_true = map(torch.cat, zip(*[(classical_surrogate_model(X_b), Y_b) for X_b, Y_b in train_loader]))
+            train_loss = loss_fn(Y_train_pred, Y_train_true)
+            train_acc = ((Y_train_pred >= 0.5).float() == Y_train_true).float().mean()
+        print(f'\nEpoch {epoch + 1}/{n_epochs}, Training Loss: {train_loss.item()}, Accuracy: {train_acc.item():.4f}\n'
+              f'Epoch {epoch + 1}/{n_epochs}, Validation Loss: {val_loss.item()}, Accuracy: {val_acc.item():.4f}\n',
+              flush=True)
 
 
 
