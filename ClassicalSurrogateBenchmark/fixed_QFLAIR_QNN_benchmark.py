@@ -333,9 +333,11 @@ for f in eig_vals:
             # fixme maybe this rounding technique in combination with set is not ideal. BUT I THINK IT DOES NOT CHANGE ANYTHING FOR THE NUMBER OF FOURIER COEFFS
             freq = np.round(freq, decimals=6)
             unique_freqs[f].add(freq)
-print("Number of Fourier coefficients estimate:", np.prod(list(map(len, unique_freqs.values()))))
+print("Number of Fourier coefficients estimate:", (n_freq_est := np.prod(list(map(len, unique_freqs.values())))))
 
-#raise SystemExit("Safeguard for too large number of Fourier coeffs - remove to run full code")
+MAX_FREQS = 100_000_000
+if n_freq_est > MAX_FREQS:
+    raise SystemExit("Number of Fourier features too large, aborting to prevent memory issues.")
 
 # Improved torch version: create Omega_torch directly
 freq_vectors = [torch.tensor(sorted(freqs), dtype=torch.float64) for _, freqs in sorted(unique_freqs.items())]
@@ -402,6 +404,8 @@ n_epochs = 1000
 optimizer = torch.optim.SGD(classical_surrogate_model.parameters(), lr=learning_rate)
 # use minibatches
 batch_size = 64
+mem_size = max(min(batch_size, MAX_FREQS // Omega_torch.numel()), 1)  # at least 1 element in mem chunk
+print(f'Batch size: {batch_size} Using memory chunk size: {mem_size}', flush=True)
 # use dataset loader for batching
 train_dataset = torch.utils.data.TensorDataset(X_train_torch, Y_train_torch)
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -412,42 +416,34 @@ for epoch in tqdm(range(n_epochs)):
     classical_surrogate_model.train()  # switch to train mode
     for X_batch, Y_batch in train_loader:
         optimizer.zero_grad()
-        Y_pred = classical_surrogate_model(X_batch)
-        loss = loss_fn(Y_pred, Y_batch)
-        loss.backward()
-        batch_acc = ((Y_pred >= 0.5).float() == Y_batch).float().mean()
+
+        # split into chunks to prevent memory blow up:
+        for X_chunk, Y_chunk in zip(torch.split(X_batch, mem_size), torch.split(Y_batch, mem_size)):
+            Y_pred_chunk = classical_surrogate_model(X_chunk)
+            loss_chunk = loss_fn(Y_pred_chunk, Y_chunk)
+            loss_chunk = loss_chunk * (X_chunk.size(0) / X_batch.size(0))  # important, assumes mean loss reduction!
+            loss_chunk.backward()  # accumulate gradients over chunks into model.weight.grad
+
         optimizer.step()
     if (epoch + 1) % 100 == 0:
         classical_surrogate_model.eval()  # switch to eval mode
         with torch.no_grad():
             # use batch loader for evaluation too:
-            Y_val_pred = torch.cat([classical_surrogate_model(X_val_batch) for X_val_batch, _ in val_loader], dim=0)
+            Y_val_pred = torch.cat([classical_surrogate_model(X_val_chunk)
+                                    for X_val_batch, _ in val_loader
+                                    for X_val_chunk in torch.split(X_val_batch, mem_size)],
+                                   dim=0)
             val_loss = loss_fn(Y_val_pred, Y_val_torch)
             val_acc = ((Y_val_pred >= 0.5).float() == Y_val_torch).float().mean()
-            Y_train_pred, Y_train_true = map(torch.cat, zip(*[(classical_surrogate_model(X_b), Y_b) for X_b, Y_b in train_loader]))
+            Y_train_pred, Y_train_true = map(torch.cat, zip(*[(classical_surrogate_model(X_chunk), Y_chunk)
+                                                              for X_b, Y_b in train_loader
+                                                              for X_chunk, Y_chunk in zip(torch.split(X_b, mem_size),
+                                                                                          torch.split(Y_b, mem_size))]))
             train_loss = loss_fn(Y_train_pred, Y_train_true)
             train_acc = ((Y_train_pred >= 0.5).float() == Y_train_true).float().mean()
         print(f'\nEpoch {epoch + 1}/{n_epochs}, Training Loss: {train_loss.item()}, Accuracy: {train_acc.item():.4f}\n'
               f'Epoch {epoch + 1}/{n_epochs}, Validation Loss: {val_loss.item()}, Accuracy: {val_acc.item():.4f}\n',
               flush=True)
-
-
-
-#def fourier_model(theta, x):
-    # result = 0
-    # for feat in selected_features:
-    #     freqs = sorted(unique_freqs[feat])
-    #     coeffs = fourier_coeffs[feat]
-    #     sum_feat = 0
-    #     for idx, freq in enumerate(freqs):
-    #         sum_feat += coeffs[idx] * np.exp(-1j * freq * x[feat])
-    #     result += sum_feat
-    # return np.real(result)
-
-
-
-# Optional: add frequencies that are close
-# TODO sanity check by fitting surrogate from learned QFLAIR circuit
 
 #
 # print('initCost',initCost,flush=True)
