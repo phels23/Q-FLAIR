@@ -421,27 +421,26 @@ eig_vals = defaultdict(list)
 # feature holds the corresponding feature index
 # qc is fully parameterized circuit
 for a, f in zip(angle, feature):
-    eig_vals[f].extend([a, -a])  # eigenvalues come in pairs (only two distinct eigenvalues per gate generator)
+    eig_vals[f].append({a/2,
+                        -a/2})  # eigenvalues in pairs (only two distinct eigenvalues per generator, which is 1/2 Pauli)
 
+# test
+#eig_vals = {list(eig_vals.keys())[0]: [{-1, 1}, {-1, 1}]}
+#print(eig_vals)
 selected_features = list(sorted(eig_vals.keys()))
-# print number of distinct frequencies per feature
-for f in eig_vals:
-    distinct_freqs = set(np.round(eig_vals[f], decimals=6))  # rounding to avoid floating point issues
-    print(f'Feature {f} has {len(distinct_freqs)} distinct frequencies: {distinct_freqs}', flush=True)
-# compute in list comprehension the number of Fourier components per feature, which is half the number of distinct frequencies + 1 (for zero frequency)
-np.prod([(len(set(np.round(eig_vals[f], decimals=6))) // 2 + 1) for f in eig_vals])
-# compute unique frequencies across all features as the unique differences in eigenvalues
-unique_freqs = defaultdict(set)
-for f in eig_vals:
-    eigs = sorted(set(np.round(eig_vals[f], decimals=6)))
-    for i in range(len(eigs)):
-        for j in range(len(eigs)):
-            freq = eigs[j] - eigs[i]
-            # round
-            # fixme maybe this rounding technique in combination with set is not ideal. BUT I THINK IT DOES NOT CHANGE ANYTHING FOR THE NUMBER OF FOURIER COEFFS
-            freq = np.round(freq, decimals=6)
-            unique_freqs[f].add(freq)
+
+unique_freqs = defaultdict(lambda: {0.0})  # start with zero freq for Minkowski sum
+for f, spec_gate in eig_vals.items():
+    for eigs in spec_gate:
+        for eig_i in eigs:
+            for eig_j in eigs:
+                freq = eig_j - eig_i
+                # minkowski sum with existing freqs:
+                print(freq)
+                unique_freqs[f] |= {np.round(freq + existing_freq, decimals=6) for existing_freq in unique_freqs[f]}
 print("Number of unique features:", len(unique_freqs))
+for f in unique_freqs:
+    print(f'Feature {f} has {len(unique_freqs[f])} unique frequencies: {sorted(unique_freqs[f])}', flush=True)
 print("Number of frequencies estimate:",
       (n_freq_est := ((int(np.prod(list(map(len, unique_freqs.values())))) - 1) // 2)))
 print("Number of Fourier coefficients estimate:", 2 * n_freq_est + 1)
