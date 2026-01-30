@@ -337,19 +337,30 @@ print("Number of Fourier coefficients estimate:", np.prod(list(map(len, unique_f
 
 #raise SystemExit("Safeguard for too large number of Fourier coeffs - remove to run full code")
 
-# sort by feature index / key
-unique_freqs = dict(sorted(unique_freqs.items()))
-abs_unique_freqs = {feat: set(sorted(abs(freq) for freq in freqs)) for feat, freqs in unique_freqs.items()}
-# create Fourier coeffs dict (numpy arrays) initialized to zero
-fourier_coeffs = {feat: np.zeros((len(freqs),), dtype=np.complex128) for feat, freqs in unique_freqs.items()}
+# Improved torch version: create Omega_torch directly
+freq_vectors = [torch.tensor(sorted(freqs), dtype=torch.float64) for _, freqs in sorted(unique_freqs.items())]
+Omega_torch = torch.cartesian_prod(*freq_vectors)
 
-n_selected_features = len(selected_features)
-omega = [[f * e_i for f in freqs] for e_i, (_, freqs) in zip(np.eye(n_selected_features), sorted(unique_freqs.items())) ]
-Omega = [sum(pair) for pair in itertools.product(*omega)]
-print(f"Number of total Fourier features: {len(Omega)}", flush=True)
-# switch to torch tensors
-Omega_torch = torch.tensor(np.asarray(Omega), dtype=torch.float64).T
-
+# Original (slow) Python native implementation:
+# # sort by feature index / key
+# unique_freqs = dict(sorted(unique_freqs.items()))
+# abs_unique_freqs = {feat: set(sorted(abs(freq) for freq in freqs)) for feat, freqs in unique_freqs.items()}
+# # create Fourier coeffs dict (numpy arrays) initialized to zero
+# fourier_coeffs = {feat: np.zeros((len(freqs),), dtype=np.complex128) for feat, freqs in unique_freqs.items()}
+#
+# n_selected_features = len(selected_features)
+# omega = [[f * e_i for f in sorted(freqs)] for e_i, (_, freqs) in zip(np.eye(n_selected_features), sorted(unique_freqs.items())) ]
+# Omega = [sum(pair) for pair in itertools.product(*omega)]
+# print(f"Number of total Fourier features: {len(Omega)}", flush=True)
+#
+# # assert that Omega matches Omega_torch
+# Omega_np = np.array(Omega)
+# assert np.allclose(Omega_np, Omega_torch.numpy()), "Omega matrices do not match!"
+#
+# # switch to torch tensors
+# Omega_torch = torch.tensor(np.asarray(Omega), dtype=torch.float64).T
+Omega_torch = Omega_torch.T  # shape (n_selected_features, n_fourier_features)
+print(f"Number of Fourier coefficients confirmed: {Omega_torch.numel()}", flush=True)
 X_train_torch = torch.tensor(normalized_Xtrain[:, selected_features], dtype=torch.float64)
 Y_train_torch = torch.tensor(Y_train, dtype=torch.float64).view(-1, 1)
 
