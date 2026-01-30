@@ -269,6 +269,114 @@ def calcCost(theta):
     return cost
 
 
+def generate_positive_half_space(unique_freqs):
+    """
+    Generates ONLY the positive half-space of frequency combinations.
+    Excludes the zero vector (origin).
+
+    Args:
+        unique_freqs (dict): {feature_idx: [freqs...]}
+
+    Returns:
+        torch.Tensor: Shape (N_half, D). The positive frequency vectors.
+    """
+    # 1. Prepare sorted tensors
+    full_vectors = [
+        torch.tensor(sorted(freqs), dtype=torch.float64)
+        for _, freqs in sorted(unique_freqs.items())
+    ]
+
+    chunks = []
+    can_have_zero_prefix = True
+
+    # 2. Iterate through dimensions to build disjoint slices
+    for i, vec in enumerate(full_vectors):
+        # If previous dimensions couldn't be zero, we can't continue the chain
+        if not can_have_zero_prefix:
+            break
+
+        # Define parts:
+        # Prefix: [0, 0, ...] (Fixed zeros for previous dims)
+        prefix = [torch.tensor([0.0], dtype=torch.float64)] * i
+
+        # Pivot: The current dimension must be strictly POSITIVE
+        pivot = [vec[vec > 0]]
+
+        # Suffix: All subsequent dimensions take ALL values
+        suffix = full_vectors[i + 1:]
+
+        # Generate slice ONLY if pivot has positive values
+        if pivot[0].numel() > 0:
+            slice_components = prefix + pivot + suffix
+            chunk = torch.cartesian_prod(*slice_components)
+            chunks.append(chunk)
+
+        # Check if we can continue chaining zeros
+        if not (vec == 0).any():
+            can_have_zero_prefix = False
+
+    # 3. Concatenate (Zero vector is naturally excluded by the pivot > 0 logic)
+    if not chunks:
+        return torch.empty((0, len(full_vectors)), dtype=torch.float64)
+
+    return torch.cat(chunks)
+
+
+def verify_omega_completeness(half_space_omega, unique_freqs):
+    """
+    Sanity Check: Reconstructs the full set (Half U -Half U {0}) and
+    compares it against the brute-force Cartesian product.
+    """
+    print("Running Sanity Check...", end=" ", flush=True)
+
+    # 1. Generate the Brute Force Full Grid
+    full_vectors = [torch.tensor(sorted(freqs), dtype=torch.float64) for _, freqs in sorted(unique_freqs.items())]
+
+    # WARNING: This might OOM if the grid is massive. Only run on small/test sets.
+    expected_full = torch.cartesian_prod(*full_vectors)
+
+    # 2. Reconstruct from Half Space
+    half = half_space_omega
+    neg_half = -1 * half_space_omega
+
+    # Check if Zero Vector should exist (only if ALL input lists contain 0)
+    has_zero = all(0 in freqs for freqs in unique_freqs.values())
+
+    parts = [half, neg_half]
+    if has_zero:
+        zero_vec = torch.zeros((1, len(full_vectors)), dtype=torch.float64)
+        parts.append(zero_vec)
+
+    reconstructed = torch.cat(parts)
+
+    # 3. Compare Sets
+    # We sort both matrices lexicographically to compare row-by-row
+    def sort_rows(matrix):
+        # Simple lexsort for PyTorch
+        if matrix.numel() == 0: return matrix
+        # Convert to numpy for stable easy lexsort
+        mat_np = matrix.numpy()
+        # Sort by last column, then 2nd to last, etc.
+        order = np.lexsort(mat_np.T[::-1])
+        return torch.tensor(mat_np[order])
+
+    expected_sorted = sort_rows(expected_full)
+    reconstructed_sorted = sort_rows(reconstructed)
+
+    # Check 1: Sizes
+    if expected_sorted.shape != reconstructed_sorted.shape:
+        raise ValueError(f"Shape Mismatch! Expected {expected_sorted.shape}, Got {reconstructed_sorted.shape}")
+
+    # Check 2: Values
+    if not torch.allclose(expected_sorted, reconstructed_sorted):
+        raise ValueError("Value Mismatch! The union does not recover the original grid.")
+
+    print("PASS. The logic is mathematically exact.")
+    print(f"  - Full Size: {expected_sorted.shape[0]}")
+    print(f"  - Half Size: {half.shape[0]}")
+    print(f"  - Zero Vec:  {'Included' if has_zero else 'Not present in input'}")
+
+
 test_train,seed,repetition,layer,kernelFile,gateFile,costFile,n_jobs,gateList,accOut,nGate = read_data()
 gate, angle, feature = read_circuit(gateFile)
 if nGate!=False and len(gate)>nGate:
@@ -333,15 +441,24 @@ for f in eig_vals:
             # fixme maybe this rounding technique in combination with set is not ideal. BUT I THINK IT DOES NOT CHANGE ANYTHING FOR THE NUMBER OF FOURIER COEFFS
             freq = np.round(freq, decimals=6)
             unique_freqs[f].add(freq)
-print("Number of Fourier coefficients estimate:", (n_freq_est := np.prod(list(map(len, unique_freqs.values())))))
+print("Number of unique features:", len(unique_freqs))
+print("Number of frequencies estimate:",
+      (n_freq_est := ((int(np.prod(list(map(len, unique_freqs.values())))) - 1) // 2)))
+print("Number of Fourier coefficients estimate:", 2 * n_freq_est + 1)
 
 MAX_FREQS = 100_000_000
 if n_freq_est > MAX_FREQS:
     raise SystemExit("Number of Fourier features too large, aborting to prevent memory issues.")
 
-# Improved torch version: create Omega_torch directly
-freq_vectors = [torch.tensor(sorted(freqs), dtype=torch.float64) for _, freqs in sorted(unique_freqs.items())]
-Omega_torch = torch.cartesian_prod(*freq_vectors)
+# Improved torch version: create Omega_torch (positive half-space) directly
+
+Omega_torch = generate_positive_half_space(unique_freqs)
+# Verify that Omega half space is correct (comment out for performance)
+# verify_omega_completeness(Omega_torch, unique_freqs)
+
+# Previous torch version to create full Omega (now replaced by generate_positive_half_space):
+# freq_vectors = [torch.tensor(sorted(freqs), dtype=torch.float64) for _, freqs in sorted(unique_freqs.items())]
+# Omega_torch = torch.cartesian_prod(*freq_vectors)
 
 # Original (slow) Python native implementation:
 # # sort by feature index / key
@@ -362,7 +479,7 @@ Omega_torch = torch.cartesian_prod(*freq_vectors)
 # # switch to torch tensors
 # Omega_torch = torch.tensor(np.asarray(Omega), dtype=torch.float64).T
 Omega_torch = Omega_torch.T  # shape (n_selected_features, n_fourier_features)
-print(f"Number of Fourier coefficients confirmed: {Omega_torch.numel()}", flush=True)
+print(f"Number of frequencies confirmed: {Omega_torch.size(1)}", flush=True)
 X_train_torch = torch.tensor(normalized_Xtrain[:, selected_features], dtype=torch.float64)
 Y_train_torch = torch.tensor(Y_train, dtype=torch.float64).view(-1, 1)
 
@@ -376,8 +493,8 @@ class FourierLinearModel(torch.nn.Module):
         self.register_buffer('Omega', omega_matrix)
         n_fourier_feats = 2 * omega_matrix.shape[1]
 
-        # Linear layer without bias (as bias is included in Fourier features via zero frequency component)
-        self.linear = torch.nn.Linear(n_fourier_feats, out_features, bias=False, dtype=torch.float64)
+        # Linear layer with bias (as bias is no longer included in Fourier features due to positive half-space)
+        self.linear = torch.nn.Linear(n_fourier_feats, out_features, bias=True, dtype=torch.float64)
 
         # Initialize weights
         with torch.no_grad():
