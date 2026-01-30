@@ -396,12 +396,12 @@ class FourierLinearModel(torch.nn.Module):
 
 classical_surrogate_model = FourierLinearModel(Omega_torch)
 
-# TODO use log loss, which is more appropriate for classification and should maintain convexity!
-loss_fn = torch.nn.MSELoss()
+#loss_fn = torch.nn.MSELoss(reduction='mean')
+loss_fn = torch.nn.BCEWithLogitsLoss(reduction='mean')  # log loss but numerically stable
 # use stochastic gradient descent to learn fourier coeffs
-learning_rate = 1e-7
+learning_rate = 1e-3
 n_epochs = 1000
-optimizer = torch.optim.SGD(classical_surrogate_model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(classical_surrogate_model.parameters(), lr=learning_rate)
 # use minibatches
 batch_size = 64
 mem_size = max(min(batch_size, MAX_FREQS // Omega_torch.numel()), 1)  # at least 1 element in mem chunk
@@ -434,15 +434,17 @@ for epoch in tqdm(range(n_epochs)):
                                     for X_val_chunk in torch.split(X_val_batch, mem_size)],
                                    dim=0)
             val_loss = loss_fn(Y_val_pred, Y_val_torch)
-            val_acc = ((Y_val_pred >= 0.5).float() == Y_val_torch).float().mean()
+            val_acc = ((Y_val_pred >= 0).float() == Y_val_torch).float().mean()  # expects logits, not probs
             Y_train_pred, Y_train_true = map(torch.cat, zip(*[(classical_surrogate_model(X_chunk), Y_chunk)
                                                               for X_b, Y_b in train_loader
                                                               for X_chunk, Y_chunk in zip(torch.split(X_b, mem_size),
                                                                                           torch.split(Y_b, mem_size))]))
             train_loss = loss_fn(Y_train_pred, Y_train_true)
-            train_acc = ((Y_train_pred >= 0.5).float() == Y_train_true).float().mean()
-        print(f'\nEpoch {epoch + 1}/{n_epochs}, Training Loss: {train_loss.item()}, Accuracy: {train_acc.item():.4f}\n'
-              f'Epoch {epoch + 1}/{n_epochs}, Validation Loss: {val_loss.item()}, Accuracy: {val_acc.item():.4f}\n',
+            train_acc = ((Y_train_pred >= 0).float() == Y_train_true).float().mean()  # expects logits, not probs
+        print(f'\nEpoch {epoch + 1}/{n_epochs}, '
+              f'Training Loss: {train_loss.item():.4f}, Accuracy: {train_acc.item()*100:.2f}%\n'
+              f'Epoch {epoch + 1}/{n_epochs}, '
+              f'Validation Loss: {val_loss.item():.4f}, Accuracy: {val_acc.item()*100:.4f}%\n',
               flush=True)
 
 #
