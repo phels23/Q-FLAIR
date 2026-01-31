@@ -418,6 +418,13 @@ qc = rebuild_qc()
 kernel=Kernel_qm(gate,angle,feature,qc)
 initCost = calcCost(angle)
 
+### Configurations for classical surrogate model training ###
+MAX_FREQS = 100_000_000
+N_EPOCHS = 1000
+LEARNING_RATE = 1e-3
+BATCH_SIZE = 64
+FREQ_DECIMALS = 6
+
 
 # Collect frequencies per feature:
 eig_vals = defaultdict(list)
@@ -441,7 +448,8 @@ for f, spec_gate in eig_vals.items():
                 freq = eig_j - eig_i
                 # minkowski sum with existing freqs:
                 print(freq)
-                unique_freqs[f] |= {np.round(freq + existing_freq, decimals=6) for existing_freq in unique_freqs[f]}
+                unique_freqs[f] |= {np.round(freq + existing_freq, decimals=FREQ_DECIMALS)
+                                    for existing_freq in unique_freqs[f]}
 print("Number of unique features:", len(unique_freqs))
 for f in unique_freqs:
     unique_freqs[f] = list(sorted(unique_freqs[f]))
@@ -524,21 +532,18 @@ classical_surrogate_model = FourierLinearModel(Omega_torch)
 #loss_fn = torch.nn.MSELoss(reduction='mean')
 loss_fn = torch.nn.BCEWithLogitsLoss(reduction='mean')  # log loss but numerically stable
 # use stochastic gradient descent to learn fourier coeffs
-learning_rate = 1e-3
-n_epochs = 1000
-optimizer = torch.optim.Adam(classical_surrogate_model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(classical_surrogate_model.parameters(), lr=LEARNING_RATE)
 # use minibatches
-batch_size = 64
-mem_size = max(min(batch_size, MAX_FREQS // n_freq_est), 1)  # at least 1 element in mem chunk
-print(f'Batch size: {batch_size} Using memory chunk size: {mem_size}', flush=True)
+mem_size = max(min(BATCH_SIZE, MAX_FREQS // n_freq_est), 1)  # at least 1 element in mem chunk
+print(f'Batch size: {BATCH_SIZE} Using memory chunk size: {mem_size}', flush=True)
 # use dataset loader for batching
 train_dataset = torch.utils.data.TensorDataset(X_train_torch, Y_train_torch)
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 val_dataset = torch.utils.data.TensorDataset(X_val_torch, Y_val_torch)
-val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 # after each epoch, evaluate on validation set and print loss + accuracy
 # losses = []
-for epoch in tqdm(range(n_epochs)):
+for epoch in tqdm(range(N_EPOCHS)):
     classical_surrogate_model.train()  # switch to train mode
     for X_batch, Y_batch in train_loader:
         optimizer.zero_grad()
@@ -570,9 +575,9 @@ for epoch in tqdm(range(n_epochs)):
                                                                                           torch.split(Y_b, mem_size))]))
             train_loss = loss_fn(Y_train_pred, Y_train_true)
             train_acc = balanced_accuracy_score(Y_train_true.numpy(), (Y_train_pred >= 0).int().numpy())  # expects logits, not probs
-        print(f'\nEpoch {epoch + 1}/{n_epochs}, '
+        print(f'\nEpoch {epoch + 1}/{N_EPOCHS}, '
               f'Training Loss: {train_loss.item():.4f}, Accuracy: {train_acc*100:.2f}%\n'
-              f'Epoch {epoch + 1}/{n_epochs}, '
+              f'Epoch {epoch + 1}/{N_EPOCHS}, '
               f'Validation Loss: {val_loss.item():.4f}, Accuracy: {val_acc*100:.2f}%\n',
               flush=True)
         with open(accOut, 'a') as acc_file:
