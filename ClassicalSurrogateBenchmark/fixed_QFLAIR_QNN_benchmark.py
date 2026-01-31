@@ -252,135 +252,135 @@ def Kernel_qm(gate,angle,feature,qc):
 
 
 def calcCost(theta):
-    cost = 0
-    expect_collect = []
-    n_Y = len(Y_train)
-    n_Y_inv = 1 / n_Y
-    for i in range(n_Y):
-        datai = np.array(normalized_Xtrain[i])
-        qc_eval = kernel[i].copy()
+	cost = 0
+	expect_collect = []
+	n_Y = len(Y_train)
+	n_Y_inv = 1 / n_Y
+	for i in range(n_Y):
+		datai = np.array(normalized_Xtrain[i])
+		qc_eval = kernel[i].copy()
 
-        for lg in range(len(gate)):
-            try:
-                qc_eval.assign_parameters({ANGLE[lg]: theta[lg]}, inplace=True)
-            except:
-                pass
-        st = Statevector(qc_eval)
-        expect = st.probabilities()[0]
-        expect_collect.append(expect)
+		for lg in range(len(gate)):
+			try:
+				qc_eval.assign_parameters({ANGLE[lg]: theta[lg]}, inplace=True)
+			except:
+				pass
+		st = Statevector(qc_eval)
+		expect = st.probabilities()[0]
+		expect_collect.append(expect)
 
-    cost = log_loss(Y_train, expect_collect)
-    return cost
+	cost = log_loss(Y_train, expect_collect)
+	return cost
 
 
 def generate_positive_half_space(unique_freqs):
-    """
-    Generates ONLY the positive half-space of frequency combinations.
-    Excludes the zero vector (origin).
+	"""
+	Generates ONLY the positive half-space of frequency combinations.
+	Excludes the zero vector (origin).
 
-    Args:
-        unique_freqs (dict): {feature_idx: [freqs...]}
+	Args:
+		unique_freqs (dict): {feature_idx: [freqs...]}
 
-    Returns:
-        torch.Tensor: Shape (N_half, D). The positive frequency vectors.
-    """
-    # 1. Prepare sorted tensors
-    full_vectors = [
-        torch.tensor(sorted(freqs), dtype=torch.float64)
-        for _, freqs in sorted(unique_freqs.items())
-    ]
+	Returns:
+		torch.Tensor: Shape (N_half, D). The positive frequency vectors.
+	"""
+	# 1. Prepare sorted tensors
+	full_vectors = [
+		torch.tensor(sorted(freqs), dtype=torch.float64)
+		for _, freqs in sorted(unique_freqs.items())
+	]
 
-    n_feats = len(full_vectors)
-    chunks = []
-    can_have_zero_prefix = True
+	n_feats = len(full_vectors)
+	chunks = []
+	can_have_zero_prefix = True
 
-    # 2. Iterate through dimensions to build disjoint slices
-    for i, vec in enumerate(full_vectors):
-        # If previous dimensions couldn't be zero, we can't continue the chain
-        if not can_have_zero_prefix:
-            break
+	# 2. Iterate through dimensions to build disjoint slices
+	for i, vec in enumerate(full_vectors):
+		# If previous dimensions couldn't be zero, we can't continue the chain
+		if not can_have_zero_prefix:
+			break
 
-        # Define parts:
-        # Prefix: [0, 0, ...] (Fixed zeros for previous dims)
-        prefix = [torch.tensor([0.0], dtype=torch.float64)] * i
+		# Define parts:
+		# Prefix: [0, 0, ...] (Fixed zeros for previous dims)
+		prefix = [torch.tensor([0.0], dtype=torch.float64)] * i
 
-        # Pivot: The current dimension must be strictly POSITIVE
-        pivot = [vec[vec > 0]]
+		# Pivot: The current dimension must be strictly POSITIVE
+		pivot = [vec[vec > 0]]
 
-        # Suffix: All subsequent dimensions take ALL values
-        suffix = full_vectors[i + 1:]
+		# Suffix: All subsequent dimensions take ALL values
+		suffix = full_vectors[i + 1:]
 
-        # Generate slice ONLY if pivot has positive values
-        if pivot[0].numel() > 0:
-            slice_components = prefix + pivot + suffix
-            chunk = torch.cartesian_prod(*slice_components)
-            chunk = chunk.view(-1, n_feats)  # ensure 2D shape
-            chunks.append(chunk)
+		# Generate slice ONLY if pivot has positive values
+		if pivot[0].numel() > 0:
+			slice_components = prefix + pivot + suffix
+			chunk = torch.cartesian_prod(*slice_components)
+			chunk = chunk.view(-1, n_feats)  # ensure 2D shape
+			chunks.append(chunk)
 
-        # Check if we can continue chaining zeros
-        if not (vec == 0).any():
-            can_have_zero_prefix = False
+		# Check if we can continue chaining zeros
+		if not (vec == 0).any():
+			can_have_zero_prefix = False
 
-    # 3. Concatenate (Zero vector is naturally excluded by the pivot > 0 logic)
-    if not chunks:
-        return torch.empty((0, n_feats), dtype=torch.float64)
+	# 3. Concatenate (Zero vector is naturally excluded by the pivot > 0 logic)
+	if not chunks:
+		return torch.empty((0, n_feats), dtype=torch.float64)
 
-    return torch.cat(chunks)
+	return torch.cat(chunks)
 
 
 def verify_omega_completeness(half_space_omega, unique_freqs):
-    """
-    Sanity Check: Reconstructs the full set (Half U -Half U {0}) and
-    compares it against the brute-force Cartesian product.
-    """
-    print("Running Sanity Check...", end=" ", flush=True)
+	"""
+	Sanity Check: Reconstructs the full set (Half U -Half U {0}) and
+	compares it against the brute-force Cartesian product.
+	"""
+	print("Running Sanity Check...", end=" ", flush=True)
 
-    # 1. Generate the Brute Force Full Grid
-    full_vectors = [torch.tensor(sorted(freqs), dtype=torch.float64) for _, freqs in sorted(unique_freqs.items())]
+	# 1. Generate the Brute Force Full Grid
+	full_vectors = [torch.tensor(sorted(freqs), dtype=torch.float64) for _, freqs in sorted(unique_freqs.items())]
 
-    # WARNING: This might OOM if the grid is massive. Only run on small/test sets.
-    expected_full = torch.cartesian_prod(*full_vectors)
+	# WARNING: This might OOM if the grid is massive. Only run on small/test sets.
+	expected_full = torch.cartesian_prod(*full_vectors)
 
-    # 2. Reconstruct from Half Space
-    half = half_space_omega
-    neg_half = -1 * half_space_omega
+	# 2. Reconstruct from Half Space
+	half = half_space_omega
+	neg_half = -1 * half_space_omega
 
-    # Check if Zero Vector should exist (only if ALL input lists contain 0)
-    has_zero = all(0 in freqs for freqs in unique_freqs.values())
+	# Check if Zero Vector should exist (only if ALL input lists contain 0)
+	has_zero = all(0 in freqs for freqs in unique_freqs.values())
 
-    parts = [half, neg_half]
-    if has_zero:
-        zero_vec = torch.zeros((1, len(full_vectors)), dtype=torch.float64)
-        parts.append(zero_vec)
+	parts = [half, neg_half]
+	if has_zero:
+		zero_vec = torch.zeros((1, len(full_vectors)), dtype=torch.float64)
+		parts.append(zero_vec)
 
-    reconstructed = torch.cat(parts)
+	reconstructed = torch.cat(parts)
 
-    # 3. Compare Sets
-    # We sort both matrices lexicographically to compare row-by-row
-    def sort_rows(matrix):
-        # Simple lexsort for PyTorch
-        if matrix.numel() == 0: return matrix
-        # Convert to numpy for stable easy lexsort
-        mat_np = matrix.numpy()
-        # Sort by last column, then 2nd to last, etc.
-        order = np.lexsort(mat_np.T[::-1])
-        return torch.tensor(mat_np[order])
+	# 3. Compare Sets
+	# We sort both matrices lexicographically to compare row-by-row
+	def sort_rows(matrix):
+		# Simple lexsort for PyTorch
+		if matrix.numel() == 0: return matrix
+		# Convert to numpy for stable easy lexsort
+		mat_np = matrix.numpy()
+		# Sort by last column, then 2nd to last, etc.
+		order = np.lexsort(mat_np.T[::-1])
+		return torch.tensor(mat_np[order])
 
-    expected_sorted = sort_rows(expected_full)
-    reconstructed_sorted = sort_rows(reconstructed)
+	expected_sorted = sort_rows(expected_full)
+	reconstructed_sorted = sort_rows(reconstructed)
 
-    # Check 1: Sizes
-    if expected_sorted.shape != reconstructed_sorted.shape:
-        raise ValueError(f"Shape Mismatch! Expected {expected_sorted.shape}, Got {reconstructed_sorted.shape}")
+	# Check 1: Sizes
+	if expected_sorted.shape != reconstructed_sorted.shape:
+		raise ValueError(f"Shape Mismatch! Expected {expected_sorted.shape}, Got {reconstructed_sorted.shape}")
 
-    # Check 2: Values
-    if not torch.allclose(expected_sorted, reconstructed_sorted):
-        raise ValueError("Value Mismatch! The union does not recover the original grid.")
+	# Check 2: Values
+	if not torch.allclose(expected_sorted, reconstructed_sorted):
+		raise ValueError("Value Mismatch! The union does not recover the original grid.")
 
-    print("PASS. The logic is mathematically exact.")
-    print(f"  - Full Size: {expected_sorted.shape[0]}")
-    print(f"  - Half Size: {half.shape[0]}")
-    print(f"  - Zero Vec:  {'Included' if has_zero else 'Not present in input'}")
+	print("PASS. The logic is mathematically exact.")
+	print(f"  - Full Size: {expected_sorted.shape[0]}")
+	print(f"  - Half Size: {half.shape[0]}")
+	print(f"  - Zero Vec:  {'Included' if has_zero else 'Not present in input'}")
 
 
 test_train,seed,repetition,layer,kernelFile,gateFile,costFile,n_jobs,gateList,accOut,nGate = read_data()
@@ -434,8 +434,8 @@ eig_vals = defaultdict(list)
 # feature holds the corresponding feature index
 # qc is fully parameterized circuit
 for a, f in zip(angle, feature):
-    eig_vals[f].append({a/2,
-                        -a/2})  # eigenvalues in pairs (only two distinct eigenvalues per generator, which is 1/2 Pauli)
+	eig_vals[f].append({a/2,
+						-a/2})  # eigenvalues in pairs (only two distinct eigenvalues per generator, which is 1/2 Pauli)
 
 # test
 #eig_vals = {list(eig_vals.keys())[0]: [{-1, 1}, {-1, 1}]}
@@ -444,29 +444,29 @@ selected_features = list(sorted(eig_vals.keys()))
 
 unique_freqs = defaultdict(lambda: {0.0})  # start with zero freq for Minkowski sum
 for f, spec_gate in eig_vals.items():
-    for eigs in spec_gate:
-        for eig_i in eigs:
-            for eig_j in eigs:
-                freq = eig_j - eig_i
-                # minkowski sum with existing freqs:
-                print(freq)
-                unique_freqs[f] |= {np.round(freq + existing_freq, decimals=FREQ_DECIMALS)
-                                    for existing_freq in unique_freqs[f]}
+	for eigs in spec_gate:
+		for eig_i in eigs:
+			for eig_j in eigs:
+				freq = eig_j - eig_i
+				# minkowski sum with existing freqs:
+				print(freq)
+				unique_freqs[f] |= {np.round(freq + existing_freq, decimals=FREQ_DECIMALS)
+									for existing_freq in unique_freqs[f]}
 print("Number of unique features:", len(unique_freqs))
 for f in unique_freqs:
-    unique_freqs[f] = list(sorted(unique_freqs[f]))
-    print(f'Feature {f} has {len(unique_freqs[f])} unique frequencies: {unique_freqs[f]}', flush=True)
+	unique_freqs[f] = list(sorted(unique_freqs[f]))
+	print(f'Feature {f} has {len(unique_freqs[f])} unique frequencies: {unique_freqs[f]}', flush=True)
 print("Number of frequencies estimate:",
-      (n_freq_est := ((int(math.prod(list(map(len, unique_freqs.values())))) - 1) // 2)))
+	  (n_freq_est := ((int(math.prod(list(map(len, unique_freqs.values())))) - 1) // 2)))
 print("Number of Fourier coefficients estimate:", 2 * n_freq_est + 1)
 
 with open(accOut, 'w') as acc_file:
-    acc_file.write(f'num_unique_feats {len(unique_freqs)} '
-                   f'num_freqs {n_freq_est} all_freqs {json.dumps(unique_freqs, separators=(",", ":"), sort_keys=True)}\n')
+	acc_file.write(f'num_unique_feats {len(unique_freqs)} '
+				   f'num_freqs {n_freq_est} all_freqs {json.dumps(unique_freqs, separators=(",", ":"), sort_keys=True)}\n')
 
 MAX_FREQS = 100_000_000
 if n_freq_est > MAX_FREQS:
-    raise SystemExit("Number of Fourier features too large, aborting to prevent memory issues.")
+	raise SystemExit("Number of Fourier features too large, aborting to prevent memory issues.")
 
 # Improved torch version: create Omega_torch (positive half-space) directly
 
@@ -506,27 +506,27 @@ Y_val_torch = torch.tensor(Y_val, dtype=torch.float64).view(-1, 1)
 
 
 class FourierLinearModel(torch.nn.Module):
-    def __init__(self, omega_matrix, out_features=1):
-        super().__init__()
-        self.register_buffer('Omega', omega_matrix)
-        n_fourier_feats = 2 * omega_matrix.shape[1]
+	def __init__(self, omega_matrix, out_features=1):
+		super().__init__()
+		self.register_buffer('Omega', omega_matrix)
+		n_fourier_feats = 2 * omega_matrix.shape[1]
 
-        # Linear layer with bias (as bias is no longer included in Fourier features due to positive half-space)
-        self.linear = torch.nn.Linear(n_fourier_feats, out_features, bias=True, dtype=torch.float64)
+		# Linear layer with bias (as bias is no longer included in Fourier features due to positive half-space)
+		self.linear = torch.nn.Linear(n_fourier_feats, out_features, bias=True, dtype=torch.float64)
 
-        # Initialize weights
-        with torch.no_grad():
-            self.linear.weight.zero_()
+		# Initialize weights
+		with torch.no_grad():
+			self.linear.weight.zero_()
 
-    def forward(self, x):
-        # 1. Project: X @ Omega.T
-        projections = x @ self.Omega
+	def forward(self, x):
+		# 1. Project: X @ Omega.T
+		projections = x @ self.Omega
 
-        # 2. Compute Features: cos(proj), sin(proj)
-        features = torch.cat([torch.cos(projections), torch.sin(projections)], dim=-1)
+		# 2. Compute Features: cos(proj), sin(proj)
+		features = torch.cat([torch.cos(projections), torch.sin(projections)], dim=-1)
 
-        # 3. Linear Prediction
-        return self.linear(features)
+		# 3. Linear Prediction
+		return self.linear(features)
 
 
 classical_surrogate_model = FourierLinearModel(Omega_torch)
@@ -546,43 +546,43 @@ val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=BATCH_SIZE, shu
 # after each epoch, evaluate on validation set and print loss + accuracy
 # losses = []
 for epoch in tqdm(range(N_EPOCHS)):
-    classical_surrogate_model.train()  # switch to train mode
-    for X_batch, Y_batch in train_loader:
-        optimizer.zero_grad()
+	classical_surrogate_model.train()  # switch to train mode
+	for X_batch, Y_batch in train_loader:
+		optimizer.zero_grad()
 
-        # current_batch_loss = 0.0
+		# current_batch_loss = 0.0
 
-        # split into chunks to prevent memory blow up:
-        for X_chunk, Y_chunk in zip(torch.split(X_batch, mem_size), torch.split(Y_batch, mem_size)):
-            Y_pred_chunk = classical_surrogate_model(X_chunk)
-            loss_chunk = loss_fn(Y_pred_chunk, Y_chunk)
-            loss_chunk = loss_chunk * (X_chunk.size(0) / X_batch.size(0))  # important, assumes mean loss reduction!
-            loss_chunk.backward()  # accumulate gradients over chunks into model.weight.grad
-            # current_batch_loss += loss_chunk.item()
-        optimizer.step()
-        # losses.append(current_batch_loss)
-    if (epoch + 1) % 100 == 0:
-        classical_surrogate_model.eval()  # switch to eval mode
-        with torch.no_grad():
-            # use batch loader for evaluation too:
-            Y_val_pred = torch.cat([classical_surrogate_model(X_val_chunk)
-                                    for X_val_batch, _ in val_loader
-                                    for X_val_chunk in torch.split(X_val_batch, mem_size)],
-                                   dim=0)
-            val_loss = loss_fn(Y_val_pred, Y_val_torch)
-            val_acc = balanced_accuracy_score(Y_val, (Y_val_pred >= 0).int().numpy())  # expects logits, not probs
-            Y_train_pred, Y_train_true = map(torch.cat, zip(*[(classical_surrogate_model(X_chunk), Y_chunk)
-                                                              for X_b, Y_b in train_loader
-                                                              for X_chunk, Y_chunk in zip(torch.split(X_b, mem_size),
-                                                                                          torch.split(Y_b, mem_size))]))
-            train_loss = loss_fn(Y_train_pred, Y_train_true)
-            train_acc = balanced_accuracy_score(Y_train_true.numpy(), (Y_train_pred >= 0).int().numpy())  # expects logits, not probs
-        print(f'\nEpoch {epoch + 1}/{N_EPOCHS}, '
-              f'Training Loss: {train_loss.item():.4f}, Accuracy: {train_acc*100:.2f}%\n'
-              f'Epoch {epoch + 1}/{N_EPOCHS}, '
-              f'Validation Loss: {val_loss.item():.4f}, Accuracy: {val_acc*100:.2f}%\n',
-              flush=True)
-        with open(accOut, 'a') as acc_file:
-            acc_file.write(f'epoch {epoch + 1} train_loss {train_loss.item():.6f} train_acc {train_acc:.6f} '
-                           f'val_loss {val_loss.item():.6f} val_acc {val_acc:.6f}\n')
+		# split into chunks to prevent memory blow up:
+		for X_chunk, Y_chunk in zip(torch.split(X_batch, mem_size), torch.split(Y_batch, mem_size)):
+			Y_pred_chunk = classical_surrogate_model(X_chunk)
+			loss_chunk = loss_fn(Y_pred_chunk, Y_chunk)
+			loss_chunk = loss_chunk * (X_chunk.size(0) / X_batch.size(0))  # important, assumes mean loss reduction!
+			loss_chunk.backward()  # accumulate gradients over chunks into model.weight.grad
+			# current_batch_loss += loss_chunk.item()
+		optimizer.step()
+		# losses.append(current_batch_loss)
+	if (epoch + 1) % 100 == 0:
+		classical_surrogate_model.eval()  # switch to eval mode
+		with torch.no_grad():
+			# use batch loader for evaluation too:
+			Y_val_pred = torch.cat([classical_surrogate_model(X_val_chunk)
+									for X_val_batch, _ in val_loader
+									for X_val_chunk in torch.split(X_val_batch, mem_size)],
+								   dim=0)
+			val_loss = loss_fn(Y_val_pred, Y_val_torch)
+			val_acc = balanced_accuracy_score(Y_val, (Y_val_pred >= 0).int().numpy())  # expects logits, not probs
+			Y_train_pred, Y_train_true = map(torch.cat, zip(*[(classical_surrogate_model(X_chunk), Y_chunk)
+															  for X_b, Y_b in train_loader
+															  for X_chunk, Y_chunk in zip(torch.split(X_b, mem_size),
+																						  torch.split(Y_b, mem_size))]))
+			train_loss = loss_fn(Y_train_pred, Y_train_true)
+			train_acc = balanced_accuracy_score(Y_train_true.numpy(), (Y_train_pred >= 0).int().numpy())  # expects logits, not probs
+		print(f'\nEpoch {epoch + 1}/{N_EPOCHS}, '
+			  f'Training Loss: {train_loss.item():.4f}, Accuracy: {train_acc*100:.2f}%\n'
+			  f'Epoch {epoch + 1}/{N_EPOCHS}, '
+			  f'Validation Loss: {val_loss.item():.4f}, Accuracy: {val_acc*100:.2f}%\n',
+			  flush=True)
+		with open(accOut, 'a') as acc_file:
+			acc_file.write(f'epoch {epoch + 1} train_loss {train_loss.item():.6f} train_acc {train_acc:.6f} '
+						   f'val_loss {val_loss.item():.6f} val_acc {val_acc:.6f}\n')
 
