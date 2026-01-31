@@ -16,6 +16,7 @@ import itertools
 from collections import defaultdict
 import torch
 from tqdm import tqdm
+import math
 
 
 def read_data():
@@ -444,7 +445,7 @@ print("Number of unique features:", len(unique_freqs))
 for f in unique_freqs:
     print(f'Feature {f} has {len(unique_freqs[f])} unique frequencies: {sorted(unique_freqs[f])}', flush=True)
 print("Number of frequencies estimate:",
-      (n_freq_est := ((int(np.prod(list(map(len, unique_freqs.values())))) - 1) // 2)))
+      (n_freq_est := ((int(math.prod(list(map(len, unique_freqs.values())))) - 1) // 2)))
 print("Number of Fourier coefficients estimate:", 2 * n_freq_est + 1)
 
 MAX_FREQS = 100_000_000
