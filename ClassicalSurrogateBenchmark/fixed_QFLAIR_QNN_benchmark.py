@@ -17,6 +17,7 @@ from collections import defaultdict
 import torch
 from tqdm import tqdm
 import math
+import json
 
 
 def read_data():
@@ -443,10 +444,15 @@ for f, spec_gate in eig_vals.items():
                 unique_freqs[f] |= {np.round(freq + existing_freq, decimals=6) for existing_freq in unique_freqs[f]}
 print("Number of unique features:", len(unique_freqs))
 for f in unique_freqs:
-    print(f'Feature {f} has {len(unique_freqs[f])} unique frequencies: {sorted(unique_freqs[f])}', flush=True)
+    unique_freqs[f] = list(sorted(unique_freqs[f]))
+    print(f'Feature {f} has {len(unique_freqs[f])} unique frequencies: {unique_freqs[f]}', flush=True)
 print("Number of frequencies estimate:",
       (n_freq_est := ((int(math.prod(list(map(len, unique_freqs.values())))) - 1) // 2)))
 print("Number of Fourier coefficients estimate:", 2 * n_freq_est + 1)
+
+with open(accOut, 'w') as acc_file:
+    acc_file.write(f'num_unique_feats {len(unique_freqs)} '
+                   f'num_freqs {n_freq_est} all_freqs {json.dumps(unique_freqs, separators=(",", ":"), sort_keys=True)}\n')
 
 MAX_FREQS = 100_000_000
 if n_freq_est > MAX_FREQS:
@@ -531,10 +537,13 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
 val_dataset = torch.utils.data.TensorDataset(X_val_torch, Y_val_torch)
 val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 # after each epoch, evaluate on validation set and print loss + accuracy
+# losses = []
 for epoch in tqdm(range(n_epochs)):
     classical_surrogate_model.train()  # switch to train mode
     for X_batch, Y_batch in train_loader:
         optimizer.zero_grad()
+
+        # current_batch_loss = 0.0
 
         # split into chunks to prevent memory blow up:
         for X_chunk, Y_chunk in zip(torch.split(X_batch, mem_size), torch.split(Y_batch, mem_size)):
@@ -542,8 +551,9 @@ for epoch in tqdm(range(n_epochs)):
             loss_chunk = loss_fn(Y_pred_chunk, Y_chunk)
             loss_chunk = loss_chunk * (X_chunk.size(0) / X_batch.size(0))  # important, assumes mean loss reduction!
             loss_chunk.backward()  # accumulate gradients over chunks into model.weight.grad
-
+            # current_batch_loss += loss_chunk.item()
         optimizer.step()
+        # losses.append(current_batch_loss)
     if (epoch + 1) % 100 == 0:
         classical_surrogate_model.eval()  # switch to eval mode
         with torch.no_grad():
@@ -561,31 +571,11 @@ for epoch in tqdm(range(n_epochs)):
             train_loss = loss_fn(Y_train_pred, Y_train_true)
             train_acc = balanced_accuracy_score(Y_train_true.numpy(), (Y_train_pred >= 0).int().numpy())  # expects logits, not probs
         print(f'\nEpoch {epoch + 1}/{n_epochs}, '
-              f'Training Loss: {train_loss.item():.4f}, Accuracy: {train_acc.item()*100:.2f}%\n'
+              f'Training Loss: {train_loss.item():.4f}, Accuracy: {train_acc*100:.2f}%\n'
               f'Epoch {epoch + 1}/{n_epochs}, '
-              f'Validation Loss: {val_loss.item():.4f}, Accuracy: {val_acc.item()*100:.2f}%\n',
+              f'Validation Loss: {val_loss.item():.4f}, Accuracy: {val_acc*100:.2f}%\n',
               flush=True)
-
-#
-# print('initCost',initCost,flush=True)
-# bounds=[]
-# for i in range(len(angle)):
-# 	bounds.append((-1,1))
-# optimRes = minimize(calcCost, x0=angle, method='L-BFGS-B',bounds=bounds)
-# print(optimRes,flush=True)
-# OutCost=open(accOut,'w')
-# OutCost.write(f'initial\t{initCost}\n')
-# OutCost.write(f"optimized\t{optimRes['fun']}\n")
-# OutCost.write(f"newAngles\t{optimRes['x']}")
-# OutCost.close()
-#
-
-
-
-
-
-
-
-
-
+        with open(accOut, 'a') as acc_file:
+            acc_file.write(f'epoch {epoch + 1} train_loss {train_loss.item():.6f} train_acc {train_acc:.6f} '
+                           f'val_loss {val_loss.item():.6f} val_acc {val_acc:.6f}\n')
 
