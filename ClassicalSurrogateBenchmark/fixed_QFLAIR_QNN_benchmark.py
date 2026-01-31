@@ -9,7 +9,7 @@ from qiskit.quantum_info import Pauli
 from scipy.optimize import minimize
 import numpy as np
 import argparse
-from sklearn.metrics import log_loss
+from sklearn.metrics import log_loss, balanced_accuracy_score
 from qiskit import transpile
 from qiskit_aer import AerSimulator
 import itertools
@@ -552,17 +552,17 @@ for epoch in tqdm(range(n_epochs)):
                                     for X_val_chunk in torch.split(X_val_batch, mem_size)],
                                    dim=0)
             val_loss = loss_fn(Y_val_pred, Y_val_torch)
-            val_acc = ((Y_val_pred >= 0).float() == Y_val_torch).float().mean()  # expects logits, not probs
+            val_acc = balanced_accuracy_score(Y_val, (Y_val_pred >= 0).int().numpy())  # expects logits, not probs
             Y_train_pred, Y_train_true = map(torch.cat, zip(*[(classical_surrogate_model(X_chunk), Y_chunk)
                                                               for X_b, Y_b in train_loader
                                                               for X_chunk, Y_chunk in zip(torch.split(X_b, mem_size),
                                                                                           torch.split(Y_b, mem_size))]))
             train_loss = loss_fn(Y_train_pred, Y_train_true)
-            train_acc = ((Y_train_pred >= 0).float() == Y_train_true).float().mean()  # expects logits, not probs
+            train_acc = balanced_accuracy_score(Y_train_true.numpy(), (Y_train_pred >= 0).int().numpy())  # expects logits, not probs
         print(f'\nEpoch {epoch + 1}/{n_epochs}, '
               f'Training Loss: {train_loss.item():.4f}, Accuracy: {train_acc.item()*100:.2f}%\n'
               f'Epoch {epoch + 1}/{n_epochs}, '
-              f'Validation Loss: {val_loss.item():.4f}, Accuracy: {val_acc.item()*100:.4f}%\n',
+              f'Validation Loss: {val_loss.item():.4f}, Accuracy: {val_acc.item()*100:.2f}%\n',
               flush=True)
 
 #
