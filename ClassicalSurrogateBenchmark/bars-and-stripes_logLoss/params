@@ -15,4 +15,3 @@ gateFile    bars-and-stripes_logLoss/Gate_collect.txt
 costFile    bars-and-stripes_logLoss/Cost_collect.txt
 parallel    8
 #Rxx_x,Ryy_x,U2_x,U3_x,H_y
-nGate 5
