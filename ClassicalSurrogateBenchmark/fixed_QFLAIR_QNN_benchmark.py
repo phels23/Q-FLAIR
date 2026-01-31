@@ -286,6 +286,7 @@ def generate_positive_half_space(unique_freqs):
         for _, freqs in sorted(unique_freqs.items())
     ]
 
+    n_feats = len(full_vectors)
     chunks = []
     can_have_zero_prefix = True
 
@@ -309,6 +310,7 @@ def generate_positive_half_space(unique_freqs):
         if pivot[0].numel() > 0:
             slice_components = prefix + pivot + suffix
             chunk = torch.cartesian_prod(*slice_components)
+            chunk = chunk.view(-1, n_feats)  # ensure 2D shape
             chunks.append(chunk)
 
         # Check if we can continue chaining zeros
@@ -317,7 +319,7 @@ def generate_positive_half_space(unique_freqs):
 
     # 3. Concatenate (Zero vector is naturally excluded by the pivot > 0 logic)
     if not chunks:
-        return torch.empty((0, len(full_vectors)), dtype=torch.float64)
+        return torch.empty((0, n_feats), dtype=torch.float64)
 
     return torch.cat(chunks)
 
