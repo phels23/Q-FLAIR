@@ -32,7 +32,7 @@ do
     # We add a newline first to ensure we aren't appending to the end of an existing line
     echo "" >> "$NEW_PARAMS"
     echo "nGate $i" >> "$NEW_PARAMS"
-    echo "accOut      $FOLDER/Acc_collect_$i.txt" >> "$NEW_PARAMS"
+    echo "accOut      $FOLDER/ACC_classical_surrogate_$i.txt" >> "$NEW_PARAMS"
 
     # 3. Run the Python script with the NEW params file
     echo "Running benchmark with $NEW_PARAMS..."
