@@ -51,6 +51,8 @@ def read_data():
 	param_open = open(param_file,'r')
 	for line in param_open:
 		line_split = line.split()
+		if len(line_split) < 2:
+			continue
 		if line_split[0].strip() == 'Xtest': allData[0] = np.genfromtxt(line_split[1].strip(),delimiter=',')
 		elif line_split[0].strip() == 'Xtrain': allData[1] = np.genfromtxt(line_split[1].strip(),delimiter=',')
 		elif line_split[0].strip() == 'Xval': allData[2] = np.genfromtxt(line_split[1].strip(),delimiter=',')
