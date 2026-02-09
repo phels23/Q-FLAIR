@@ -417,8 +417,6 @@ PARAM = ParameterVector('x', n_feature)
 ANGLE = ParameterVector('t', len(gate))
 opZ = SparsePauliOp("Z"*n_qubit)
 qc = rebuild_qc()
-kernel=Kernel_qm(gate,angle,feature,qc)
-initCost = calcCost(angle)
 
 ### Configurations for classical surrogate model training ###
 MAX_FREQS = 100_000_000
