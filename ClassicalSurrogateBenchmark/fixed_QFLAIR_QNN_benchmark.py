@@ -105,7 +105,7 @@ def read_circuit(gateFile):
 	all_data=open(gateFile,'r')
 	for line in all_data:
 		gateL=[]
-		entries=line.split('\t')
+		entries=line.split()
 		angle.append(float(entries[-2]))
 		feature.append(int(entries[-1]))
 		for q in range(len(entries)-2):

@@ -10,10 +10,10 @@ seed    12345
 repetition  10
 layers 100
 gateList   Rxx_x,Ryy_x,U2_x,U3_x,H_y
-kernelFile  logLossBS/Kernel_collect.txt
-gateFile    logLossBS/Gate_collect.txt
-costFile    logLossBS/Cost_collect.txt
+kernelFile  logLossBS_baseline/Kernel_collect.txt
+gateFile    logLossBS_baseline/Gate_collect.txt
+costFile    logLossBS_baseline/Cost_collect.txt
 parallel    8
 #Rxx_x,Ryy_x,U2_x,U3_x,H_y
 nGate 17
-accOut      logLossBS/ACC_classical_surrogate_95.txt
+accOut      logLossBS_baseline/ACC_classical_surrogate.txt
