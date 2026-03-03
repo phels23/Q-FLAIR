@@ -36,7 +36,7 @@ do
 
     # 3. Run the Python script with the NEW params file
     echo "Running benchmark with $NEW_PARAMS..."
-    python fixed_QFLAIR_QNN_benchmark.py -p "$NEW_PARAMS"
+    python QFLAIR_QNN_benchmark.py -p "$NEW_PARAMS"
 done
 
 echo "Done!"
