@@ -1,0 +1,11 @@
+num_unique_feats 4 num_freqs 121 all_freqs {"1":[-0.476,0.0,0.476],"2":[-0.254,0.0,0.254],"8":[-1.0,0.0,1.0],"10":[-1.426,-0.926,-0.5,-0.426,0.0,0.426,0.5,0.926,1.426]}
+epoch 100 train_loss 0.523590 train_acc 0.733000 val_loss 0.596362 val_acc 0.689098
+epoch 200 train_loss 0.522468 train_acc 0.732000 val_loss 0.593746 val_acc 0.680385
+epoch 300 train_loss 0.522008 train_acc 0.735000 val_loss 0.594987 val_acc 0.687032
+epoch 400 train_loss 0.521857 train_acc 0.729000 val_loss 0.596152 val_acc 0.683548
+epoch 500 train_loss 0.521533 train_acc 0.737000 val_loss 0.593946 val_acc 0.680257
+epoch 600 train_loss 0.521434 train_acc 0.736000 val_loss 0.593689 val_acc 0.679416
+epoch 700 train_loss 0.521294 train_acc 0.734000 val_loss 0.596084 val_acc 0.686647
+epoch 800 train_loss 0.521480 train_acc 0.736000 val_loss 0.595242 val_acc 0.681930
+epoch 900 train_loss 0.520877 train_acc 0.732000 val_loss 0.595455 val_acc 0.684453
+epoch 1000 train_loss 0.521144 train_acc 0.738000 val_loss 0.594817 val_acc 0.680905

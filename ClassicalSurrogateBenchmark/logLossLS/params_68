@@ -1,0 +1,20 @@
+Xtest   ../Datasets/Xlinearly-separable_test_1000.csv
+Xtrain   ../Datasets/Xlinearly-separable_train_1000.csv
+Xval   ../Datasets/Xlinearly-separable_test_1000.csv
+Ytest   ../Datasets/Ylinearly-separable_test_1000.csv
+Ytrain   ../Datasets/Ylinearly-separable_train_1000.csv
+Yval   ../Datasets/Ylinearly-separable_test_1000.csv
+seed    12345
+repetition  10
+layers 100
+train_start	0
+train_length	1000
+gateList   Rxx_x,Ryy_x,U2_x,U3_x,H_y
+kernelFile  logLossLS/Kernel_collect.txt
+gateFile    logLossLS/Gate_collect.txt
+costFile    logLossLS/Cost_collect.txt
+parallel    4
+#	
+
+nGate 68
+accOut      logLossLS/ACC_classical_surrogate_68.txt
