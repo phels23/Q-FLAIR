@@ -3,7 +3,7 @@
 
 Code and data for the article: 
     
-J. Jäger, P. Elsässer, and E. Torabian, "Quantum feature-map learning with reduced resource overhead"
+J. Jäger, P. Elsässer, and E. Torabian, "Quantum feature-map learning with reduced resource overhead", accepted Phys. Rev. Research, 2026.
 
 (available as an [arXiv preprint arXiv:2510.03389](https://arxiv.org/abs/2510.03389))
 
