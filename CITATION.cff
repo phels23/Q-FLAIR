@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this code or data, please cite our paper as below."
+authors:
+  - family-names: "Jäger"
+    given-names: "Jonas"
+  - family-names: "Elsässer"
+    given-names: "Philipp"
+  - family-names: "Torabian"
+    given-names: "Elham"
+title: "Quantum feature-map learning with reduced resource overhead"
+version: 1.0.0
+date-released: "2026-05-09"
+url: "https://github.com/phels23/Q-FLAIR"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Jäger"
+      given-names: "Jonas"
+    - family-names: "Elsässer"
+      given-names: "Philipp"
+    - family-names: "Torabian"
+      given-names: "Elham"
+  title: "Quantum feature-map learning with reduced resource overhead"
+  journal: "Physical Review Research"
+  year: 2026
+  doi: "10.1103/v29j-rh32"
