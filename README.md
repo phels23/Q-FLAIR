@@ -67,3 +67,7 @@ The data in Results is split in data for experiments and simulations of quantum 
 - 'PlotOptim.ipynb' plots the results for post-optimization
 - 'PlotRandomGate_paper.ipynb' plots the result of the ablation study
 
+QuantumFisherInformation contains an additional study in which the Quantum Fisher Information Matrix (QFIM) between the ZZFeatureMap and Q-FLAIR is compared.
+- 'QuantumFisherInformation_QFLAIR.py' in the subdirectory 'Q-FLAIR' calculates the QFIM for Q-FLAIR. The results for different sizes of MNIST are found in the same subdirectory
+- 'QuantumFisherInformation.py' in the subdirectory 'ZZFeatureMap' does the same for ZZFeatureMap. The results are again in the same directory.
+- 'plotAccuracy_Q-FLAIR_ZZfeature.py' is the script for plotting the results.
