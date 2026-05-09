@@ -1,11 +1,27 @@
+[![paper](https://img.shields.io/badge/Phys.%20Rev.%20Research-Paper-0274b5.svg)](https://doi.org/10.1103/v29j-rh32)
+[![arXiv](https://img.shields.io/badge/arXiv-2510.03389-b31b1b.svg)](https://arxiv.org/abs/2510.03389)
+
 # Q-FLAIR 
 ***(Quantum Feature-Map Learning via Analytic Iterative Reconstructions)***
 
-Code and data for the article: 
-    
-J. Jäger, P. Elsässer, and E. Torabian, "Quantum feature-map learning with reduced resource overhead", accepted Phys. Rev. Research, 2026.
+Code and data for the article:
 
-(available as an [arXiv preprint arXiv:2510.03389](https://arxiv.org/abs/2510.03389))
+J. Jäger, P. Elsässer, and E. Torabian. **"Quantum feature-map learning with reduced resource overhead."** *Phys. Rev. Research*, 2026. Available at [DOI: 10.1103/v29j-rh32](https://doi.org/10.1103/v29j-rh32)
+
+<details>
+<summary><b>Click to expand BibTeX</b></summary>
+
+```bibtex
+@article{jaeger2026qflair,
+  author  = {J\"{a}ger, Jonas and Els\"{a}sser, Philipp and Torabian, Elham},
+  title   = {Quantum feature-map learning with reduced resource overhead},
+  journal = {Physical Review Research}, 
+  year    = {2026},
+  doi     = {10.1103/v29j-rh32},
+  url     = {[https://doi.org/10.1103/v29j-rh32](https://doi.org/10.1103/v29j-rh32)}
+}
+```
+</details>
 
 The learning of quantum features by Q-FLAIR was demonstrated for quantum neural networks and quantum support vector machines. The code for the quantum neural network may be found in 'QNN', that for the quantum support vector machines in 'QSVM'.
 
@@ -78,3 +94,4 @@ QuantumFisherInformation contains an additional study in which the Quantum Fishe
 - 'QuantumFisherInformation_QFLAIR.py' in the subdirectory 'Q-FLAIR' calculates the QFIM for Q-FLAIR. The results for different sizes of MNIST are found in the same subdirectory
 - 'QuantumFisherInformation.py' in the subdirectory 'ZZFeatureMap' does the same for ZZFeatureMap. The results are again in the same directory.
 - 'plotAccuracy_Q-FLAIR_ZZfeature.py' is the script for plotting the results.
+
