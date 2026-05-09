@@ -67,6 +67,13 @@ The data in Results is split in data for experiments and simulations of quantum 
 - 'PlotOptim.ipynb' plots the results for post-optimization
 - 'PlotRandomGate_paper.ipynb' plots the result of the ablation study
 
+ClassicalSurrogateBenchmark contains an additional study on de-quantization robustness of Q-FLAIR against direct classical modeling (Fourier linear models).
+- 'QFLAIR_QNN_benchmark.py' is the core PyTorch training script of classical surrogates and corresponding Q-FLAIR iteration.
+- 'QFLAIR_QNN_benchmark_plot_figure.ipynb' plots the benchmark results for the bars & stripes dataset over incrementally growing ansatz depth, comparing the test accuracies of Q-FLAIR QNNs and the trained classical surrogate models, as well as visualizes the parameter count required for the classical surrogate model to match the quantum circuit at each Q-FLAIR iteration. 
+- 'QFLAIR_QNN_benchmark_table.ipynb' devises a table comparing classical surrogate and Q-FLAIR QNN accuracies.
+- 'run_benchmark.sh' runs the benchmark for a single dataset and selected Q-FLAIR iterations.
+- 'run_benchmarks.sh' automatically discovers all directories/datasets containing a params file and runs benchmarks for them.
+
 QuantumFisherInformation contains an additional study in which the Quantum Fisher Information Matrix (QFIM) between the ZZFeatureMap and Q-FLAIR is compared.
 - 'QuantumFisherInformation_QFLAIR.py' in the subdirectory 'Q-FLAIR' calculates the QFIM for Q-FLAIR. The results for different sizes of MNIST are found in the same subdirectory
 - 'QuantumFisherInformation.py' in the subdirectory 'ZZFeatureMap' does the same for ZZFeatureMap. The results are again in the same directory.
