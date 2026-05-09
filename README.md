@@ -1,5 +1,6 @@
 [![paper](https://img.shields.io/badge/Phys.%20Rev.%20Research-Paper-0274b5.svg)](https://doi.org/10.1103/v29j-rh32)
 [![arXiv](https://img.shields.io/badge/arXiv-2510.03389-b31b1b.svg)](https://arxiv.org/abs/2510.03389)
+[![DOI](https://zenodo.org/badge/1040833456.svg)](https://doi.org/10.5281/zenodo.20101654)
 
 # Q-FLAIR 
 ***(Quantum Feature-Map Learning via Analytic Iterative Reconstructions)***
