@@ -1,0 +1,10 @@
+Reading parameters
+Parameter-reading is finished
+Setup
+Split 1000 samples into 200 parallel tasks.
+
+Done.
+Final Shape: (1000, 196, 196)
+Effective Dimension: 351.5092
+Total time: 5856.65s
+Time per sample: 5.8566s
