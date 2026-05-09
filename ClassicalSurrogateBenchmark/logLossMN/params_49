@@ -1,0 +1,19 @@
+Xtest   ../Datasets/Xmnist-pca_test_10d_1902.csv
+Xtrain   ../Datasets/Xmnist-pca_train_10d_11552.csv
+Xval   ../Datasets/Xmnist-pca_test_10d_1902.csv
+Ytest   ../Datasets/Ymnist-pca_test_10d_1902.csv
+Ytrain   ../Datasets/Ymnist-pca_train_10d_11552.csv
+Yval   ../Datasets/Ymnist-pca_test_10d_1902.csv
+train_start 0
+train_length  11552
+seed    12345
+repetition  10
+layers 100
+gateList   Rxx_x,Ryy_x,U2_x,U3_x,H_y
+kernelFile  logLossMN/Kernel_collect.txt
+gateFile    logLossMN/Gate_collect.txt
+costFile    logLossMN/Cost_collect.txt
+parallel    8
+
+nGate 49
+accOut      logLossMN/ACC_classical_surrogate_49.txt

@@ -1,0 +1,20 @@
+Xtest   ../Datasets/Xbars-and-stripes_4d_200.csv
+Xtrain   ../Datasets/Xbars-and-stripes_4d_1000.csv
+Xval   ../Datasets/Xbars-and-stripes_4d_200.csv
+Ytest   ../Datasets/Ybars-and-stripes_4d_200.csv
+Ytrain   ../Datasets/Ybars-and-stripes_4d_1000.csv
+Yval   ../Datasets/Ybars-and-stripes_4d_200.csv
+train_start 0
+train_length  1000
+seed    12345
+repetition  10
+layers 100
+gateList   Rxx_x,Ryy_x,U2_x,U3_x,H_y
+kernelFile  logLossBS/Kernel_collect.txt
+gateFile    logLossBS/Gate_collect.txt
+costFile    logLossBS/Cost_collect.txt
+parallel    8
+#Rxx_x,Ryy_x,U2_x,U3_x,H_y
+
+nGate 27
+accOut      logLossBS/ACC_classical_surrogate_27.txt

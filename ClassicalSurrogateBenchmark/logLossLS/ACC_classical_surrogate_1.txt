@@ -1,0 +1,11 @@
+num_unique_feats 1 num_freqs 1 all_freqs {"10":[-0.5,0.0,0.5]}
+epoch 100 train_loss 0.693149 train_acc 0.500000 val_loss 0.693094 val_acc 0.500000
+epoch 200 train_loss 0.693147 train_acc 0.500000 val_loss 0.693146 val_acc 0.500000
+epoch 300 train_loss 0.693147 train_acc 0.500000 val_loss 0.693164 val_acc 0.500000
+epoch 400 train_loss 0.693148 train_acc 0.500000 val_loss 0.693114 val_acc 0.500000
+epoch 500 train_loss 0.693147 train_acc 0.500000 val_loss 0.693165 val_acc 0.500000
+epoch 600 train_loss 0.693150 train_acc 0.500000 val_loss 0.693078 val_acc 0.500000
+epoch 700 train_loss 0.693147 train_acc 0.500000 val_loss 0.693170 val_acc 0.500000
+epoch 800 train_loss 0.693147 train_acc 0.500000 val_loss 0.693157 val_acc 0.500000
+epoch 900 train_loss 0.693147 train_acc 0.500000 val_loss 0.693159 val_acc 0.500000
+epoch 1000 train_loss 0.693147 train_acc 0.500000 val_loss 0.693126 val_acc 0.500000
