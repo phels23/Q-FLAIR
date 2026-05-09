@@ -1,6 +1,6 @@
 {
-  "title": "Code and data for the article: Jonas Jäger, Philipp Elsässer, and E. Torabian, 'Quantum feature-map learning with reduced resource overhead'",
-  "description": "Source code and data for the Q-FLAIR (Quantum Feature-Map Learning via Analytic Iterative Reconstructions) algorithm introduced in the article.",
+  "title": "Q-FLAIR: Quantum feature-map learning with reduced resource overhead",
+  "description": "Source code and data for the Q-FLAIR (Quantum Feature-Map Learning via Analytic Iterative Reconstructions) algorithm introduced in the Physical Review Research article J. Jäger, P. Elsässer, and E. Torabian, 'Quantum feature-map learning with reduced resource overhead', 2026.",
   "upload_type": "software",
   "creators": [
     {
@@ -23,6 +23,11 @@
       "identifier": "10.48550/arXiv.2510.03389",
       "relation": "isSupplementTo",
       "resource_type": "publication-preprint"
+    },
+    {
+      "identifier": "10.1103/v29j-rh32",
+      "relation": "isSupplementTo",
+      "resource_type": "publication-article"
     }
   ]
 }
