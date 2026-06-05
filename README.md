@@ -7,19 +7,25 @@
 
 Code and data for the article:
 
-J. Jäger, P. Elsässer, and E. Torabian. **"Quantum feature-map learning with reduced resource overhead."** *Phys. Rev. Research*, 2026. Available at [DOI: 10.1103/v29j-rh32](https://doi.org/10.1103/v29j-rh32)
+J. Jäger, P. Elsässer, and E. Torabian. **"Quantum feature-map learning with reduced resource overhead."** *Phys. Rev. Research* 8(2), 023247 (2026). Available at [DOI: 10.1103/v29j-rh32](https://doi.org/10.1103/v29j-rh32)
 
 <details>
 <summary><b>Click to expand BibTeX</b></summary>
 
 ```bibtex
 @article{jaeger2026qflair,
-  author  = {J\"{a}ger, Jonas and Els\"{a}sser, Philipp and Torabian, Elham},
-  title   = {Quantum feature-map learning with reduced resource overhead},
-  journal = {Physical Review Research}, 
-  year    = {2026},
-  doi     = {10.1103/v29j-rh32},
-  url     = {[https://doi.org/10.1103/v29j-rh32](https://doi.org/10.1103/v29j-rh32)}
+  title = {Quantum feature-map learning with reduced resource overhead},
+  author = {J\"ager, Jonas and Els\"asser, Philipp and Torabian, Elham},
+  journal = {Phys. Rev. Res.},
+  volume = {8},
+  issue = {2},
+  pages = {023247},
+  numpages = {23},
+  year = {2026},
+  month = {Jun},
+  publisher = {American Physical Society},
+  doi = {10.1103/v29j-rh32},
+  url = {https://link.aps.org/doi/10.1103/v29j-rh32}
 }
 ```
 </details>
@@ -52,7 +58,7 @@ The programs in QNN_IBM are:
 
 - 'QNN_logLoss_ibm.py' is the basic algorithm for the training of a QNN for the IBM quantum computing benchmark
 - 'QNN_predict_ibm.py' is the code that is used to predict average accuracies on the train and test datasets, given both the IBM benchmark model results and also numerical simulations as a reference
-- Remaining files are copies, potentially with slight modifications specific to IBM benchmarking, of the helper helper files (e.g., containing definitions) in QNN 
+- Remaining files are copies, potentially with slight modifications specific to IBM benchmarking, of the helper files (e.g., containing definitions) in QNN 
 
 The programs in QSVM are:
 

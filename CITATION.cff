@@ -22,5 +22,10 @@ preferred-citation:
       given-names: "Elham"
   title: "Quantum feature-map learning with reduced resource overhead"
   journal: "Physical Review Research"
+  volume: 8
+  issue: 2
+  start: "023247"
+  month: 6
   year: 2026
   doi: "10.1103/v29j-rh32"
+  url: "https://link.aps.org/doi/10.1103/v29j-rh32"
